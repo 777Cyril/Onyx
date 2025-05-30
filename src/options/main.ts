@@ -1,4 +1,6 @@
 import { LitElement, html, css } from "lit";
+import { getSnippets } from "../storage";
+import { state } from "lit/decorators.js";
 
 class OnyxOptions extends LitElement {
   static styles = css`
@@ -8,13 +10,30 @@ class OnyxOptions extends LitElement {
       font-family: system-ui, sans-serif;
     }
   `;
+    @state()
+    private snippets: any[] = [];
 
-  render() {
-    return html`
-      <h1>Onyx Snippets • Settings</h1>
-      <p>Configure your snippet library here.</p>
-    `;
-  }
+    async firstUpdated() {
+        this.snippets = await getSnippets();
+        console.log("Loaded snippets:", this.snippets);
+    }
+
+    render() {
+        return html`
+          <h1>Onyx Snippets • Settings</h1>
+          <p>Configure your snippet library here.</p>
+      
+          <ul>
+            ${this.snippets.map(
+              (snippet) =>
+                html`<li>
+                  <strong>${snippet.title}</strong>: ${snippet.content}
+                </li>`
+            )}
+          </ul>
+        `;
+      }
+      
 }
 
 customElements.define("onyx-options", OnyxOptions);
