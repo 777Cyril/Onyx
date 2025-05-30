@@ -8,8 +8,6 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        popup:      "src/popup/index.html",
-        options:    "src/options/index.html",
         content:    "src/content/inject.ts",
         background: "src/background.ts"
       },
@@ -22,6 +20,8 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         { src: "manifest.json",         dest: "." },
+        { src: "src/popup/index.html",    dest: ".", rename: "popup.html" },
+        { src: "src/options/index.html",  dest: ".", rename: "options.html" }
       ]
     })
   ]
