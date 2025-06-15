@@ -2,17 +2,16 @@
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
-
 export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        popup:      "popup.html",
-        options:    "options.html",
-        content:    "src/content/inject.ts",
-        background: "src/background.ts",
+        popup:         "popup.html",
+        options:       "options.html",
+        content:       "src/content/inject.ts",
+        background:    "src/background.ts",
       },
       output: {
         // emit popup.js, options.js, content.js, background.js at dist root
@@ -20,15 +19,14 @@ export default defineConfig({
         // leave any CSS or other assets alone
         assetFileNames: "[name].[ext]"
       }
-      
     }
   },
   plugins: [
     viteStaticCopy({
       targets: [
-        { src: "manifest.json",         dest: "." },
+        { src: "manifest.json", dest: "." },
+        { src: "icons", dest: "." }  // 👈 Add this line to copy icons/ to dist/icons/
       ]
     })
   ]
-  
 });

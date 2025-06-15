@@ -35,7 +35,7 @@
     }
   ],
 
-  "permissions": ["storage", "activeTab", "commands"],
+  "permissions": ["storage", "activeTab", "commands", "webRequest"],
   "host_permissions": ["<all_urls>"],
 
   "commands": {

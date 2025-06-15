@@ -1,3 +1,63 @@
+// Snippet interface
+interface Snippet {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: number;
+}
+
+// Storage utility functions
+function getSnippetsFromStorage(): Promise<Snippet[]> {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(null, (data) => {
+            try {
+                const snippetIndex = data['onyx-index'] || [];
+                const allSnippets: Snippet[] = [];
+                
+                for (const snippetId of snippetIndex) {
+                    const snippetKey = `snippet-${snippetId}`;
+                    const snippet = data[snippetKey];
+                    if (snippet) {
+                        allSnippets.push(snippet);
+                    }
+                }
+                
+                // Sort by creation date (newest first)
+                allSnippets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                resolve(allSnippets);
+            } catch (error) {
+                console.error('Error loading snippets:', error);
+                resolve([]);
+            }
+        });
+    });
+}
+
+function filterSnippets(snippets: Snippet[], query: string): Snippet[] {
+    if (!query) return snippets;
+    
+    const lowerQuery = query.toLowerCase();
+    return snippets.filter(snippet => {
+        const title = (snippet.title || '').toLowerCase();
+        return title.includes(lowerQuery);
+    }).sort((a, b) => {
+        // Sort by how early the match occurs
+        const aIndex = (a.title || '').toLowerCase().indexOf(lowerQuery);
+        const bIndex = (b.title || '').toLowerCase().indexOf(lowerQuery);
+        return aIndex - bIndex;
+    });
+}
+
+function findExactMatch(snippets: Snippet[], query: string): Snippet | null {
+    if (!query.trim()) return null;
+    
+    const exactMatch = snippets.find(snippet => 
+        snippet.title.toLowerCase() === query.toLowerCase().trim()
+    );
+    return exactMatch || null;
+}
+
 // Global state for snippet mode
 let snippetModeState: {
     active: boolean;
@@ -9,6 +69,7 @@ let snippetModeState: {
     textNode?: Node;
     isAnimating?: boolean;
     animationController?: AbortController;
+    enterKeyBlocked?: boolean;
 } = {
     active: false,
     target: null,
@@ -16,7 +77,8 @@ let snippetModeState: {
     searchQuery: '',
     selectedIndex: 0,
     filteredSnippets: [],
-    isAnimating: false
+    isAnimating: false,
+    enterKeyBlocked: false
 };
 
 // Create or reuse a floating overlay element
@@ -59,30 +121,29 @@ function getPicker(): HTMLElement {
             background: #666;
         }
         
-        /* Magical auto-complete animations */
-        @keyframes glowPulse {
+        /* Border Trace Effect */
+        @keyframes borderTrace {
             0% {
-                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                box-shadow: inset 2px 0 0 #ff0000, inset 0 0 0 transparent;
             }
             25% {
-                box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.4);
+                box-shadow: inset 2px 0 0 #ff0000, inset 0 2px 0 #ff0000;
             }
             50% {
-                box-shadow: 0 0 12px 4px rgba(255, 0, 0, 0.6);
+                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 #ff0000, inset -2px 0 0 #ff0000;
             }
             75% {
-                box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.4);
+                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 #ff0000, inset -2px 0 0 #ff0000;
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                box-shadow: inset 0 0 0 transparent;
             }
         }
         
-        .onyx-glow-effect {
-            animation: glowPulse 1000ms ease-in-out !important;
-            border-radius: 4px !important;
-            transition: none !important;
+        .onyx-border-trace-effect {
+            animation: borderTrace 400ms ease-in-out !important;
         }
+        
         
         .onyx-exact-match {
             background: #1a3a1a !important;
@@ -112,6 +173,8 @@ function getPicker(): HTMLElement {
 
 // Hide the picker and reset snippet mode
 function hidePicker() {
+    console.log('🚪 Hiding picker and resetting snippet mode');
+    
     const picker = document.getElementById("onyx-picker");
     if (picker) {
         picker.remove();
@@ -135,8 +198,11 @@ function hidePicker() {
         searchQuery: '',
         selectedIndex: 0,
         filteredSnippets: [],
-        isAnimating: false
+        isAnimating: false,
+        enterKeyBlocked: false
     };
+    
+    console.log('✅ Snippet mode reset - Enter key should work normally now');
     
     // Remove event listeners
     document.removeEventListener('click', handleOutsideClick);
@@ -152,151 +218,28 @@ function handleOutsideClick(e: Event) {
     }
 }
 
-// Filter snippets based on search query
-function filterSnippets(snippets: any[], query: string): any[] {
-    if (!query) return snippets;
-    
-    const lowerQuery = query.toLowerCase();
-    return snippets.filter(snippet => {
-        const title = (snippet.title || '').toLowerCase();
-        return title.includes(lowerQuery);
-    }).sort((a, b) => {
-        // Sort by how early the match occurs
-        const aIndex = (a.title || '').toLowerCase().indexOf(lowerQuery);
-        const bIndex = (b.title || '').toLowerCase().indexOf(lowerQuery);
-        return aIndex - bIndex;
-    });
-}
 
-// Check for exact match with prompt title
-function checkForExactMatch(searchQuery: string, filteredSnippets: any[]): any | null {
-    if (!searchQuery.trim()) return null;
-    
-    // Case-insensitive exact match for prompt titles
-    const exactMatch = filteredSnippets.find(snippet => 
-        snippet.title.toLowerCase() === searchQuery.toLowerCase().trim()
-    );
-    return exactMatch || null;
-}
-
-// Apply glow pulse effect to target element
-function applyGlowEffect(target: HTMLElement) {
+// Apply border trace effect to input element
+function applyBorderTraceEffect(target: HTMLElement) {
     if (!target) return;
     
-    // Add glow class
-    target.classList.add('onyx-glow-effect');
+    console.log('🔳 Applying border trace effect');
     
-    // Remove glow class after animation completes
+    // Store original box-shadow to restore later
+    const originalBoxShadow = target.style.boxShadow || '';
+    
+    // Add border trace class
+    target.classList.add('onyx-border-trace-effect');
+    
+    // Remove border trace effect after animation completes
     setTimeout(() => {
-        target.classList.remove('onyx-glow-effect');
-    }, 1000);
+        target.classList.remove('onyx-border-trace-effect');
+        // Restore original box-shadow if any
+        target.style.boxShadow = originalBoxShadow;
+        console.log('✅ Border trace effect completed');
+    }, 400);
 }
 
-
-// Insert content instantly at cursor position
-function insertContentInstantly(content: string, target: HTMLElement, startPos: number) {
-    if (!target) return;
-    
-    try {
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            const inputEl = target as HTMLInputElement | HTMLTextAreaElement;
-            const currentValue = inputEl.value;
-            const currentPos = inputEl.selectionStart || 0;
-            
-            // Remove x/ and search query, then insert content
-            const before = currentValue.slice(0, startPos);
-            const after = currentValue.slice(currentPos);
-            const newValue = before + content + after;
-            
-            inputEl.value = newValue;
-            const newPos = before.length + content.length;
-            inputEl.setSelectionRange(newPos, newPos);
-            
-            // Dispatch events for reactivity
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-            
-        } else if (target.isContentEditable) {
-            const sel = window.getSelection();
-            if (!sel || !sel.focusNode) return;
-            
-            const textNode = sel.focusNode as Text;
-            const text = textNode.textContent || '';
-            const currentPos = sel.focusOffset;
-            
-            // Remove x/ and search query, then insert content
-            const before = text.slice(0, startPos);
-            const after = text.slice(currentPos);
-            
-            textNode.textContent = before + content + after;
-            
-            // Set cursor position after inserted content
-            const newOffset = before.length + content.length;
-            sel.collapse(textNode, newOffset);
-            
-            // Dispatch input event
-            target.dispatchEvent(new InputEvent('input', {
-                bubbles: true,
-                cancelable: true,
-                inputType: 'insertText',
-                data: content
-            }));
-        }
-    } catch (error) {
-        console.error('Error inserting content:', error);
-    }
-}
-
-// Magical instant injection with glow pulse effect
-async function magicalInstantInject(content: string, target: HTMLElement, startPos: number): Promise<void> {
-    try {
-        console.log('✨ Starting magical instant injection');
-        
-        // Insert content instantly
-        insertContentInstantly(content, target, startPos);
-        
-        // Apply glow pulse effect
-        applyGlowEffect(target);
-        
-        console.log('✅ Magical instant injection completed');
-    } catch (error) {
-        console.error('❌ Error during magical instant injection:', error);
-        throw error;
-    }
-}
-
-// Magical snippet injection with instant glow pulse effect
-async function magicalInjectSnippet(snippet: any) {
-    if (!snippetModeState.target || snippetModeState.isAnimating) return;
-    
-    console.log('✨ Starting magical injection:', snippet.title);
-    
-    // Set animation state
-    snippetModeState.isAnimating = true;
-    
-    try {
-        const target = snippetModeState.target;
-        const startPos = snippetModeState.startPosition;
-        const content = snippet.content || '';
-        
-        // Hide picker immediately
-        hidePicker();
-        
-        // Instantly inject content with glow pulse effect
-        await magicalInstantInject(content, target, startPos);
-        
-        console.log('✅ Magical injection completed');
-        
-    } catch (error) {
-        console.error('❌ Error during magical injection:', error);
-    } finally {
-        // Reset animation state after glow pulse completes
-        setTimeout(() => {
-            snippetModeState.isAnimating = false;
-            snippetModeState.animationController = undefined;
-        }, 1050); // Slightly longer than glow pulse duration
-    }
-}
 
 // Highlight matching text in snippet title
 function highlightMatch(text: string, query: string): string {
@@ -373,7 +316,7 @@ function updatePicker(snippets: any[]) {
     }
     
     // Check for exact match
-    const exactMatch = checkForExactMatch(snippetModeState.searchQuery, snippets);
+    const exactMatch = findExactMatch(snippets, snippetModeState.searchQuery);
     
     // Create snippet items (no header for minimal design)
     snippets.forEach((snippet, index) => {
@@ -459,15 +402,101 @@ function selectSnippet(index: number) {
     }
 }
 
-// Insert the selected snippet
-function insertSnippet(snippet: any) {
+// Safe contentEditable insertion that handles Claude.ai's complex DOM structure
+function insertIntoContentEditable(target: HTMLElement, content: string, startPos: number) {
+    console.log('🔧 Safe contentEditable insertion for Claude.ai');
+    
+    try {
+        // Method 1: Try direct value manipulation if it exists
+        if ('value' in target && typeof (target as any).value === 'string') {
+            const inputEl = target as any;
+            const currentValue = inputEl.value || '';
+            const currentPos = currentValue.length; // Use end position as fallback
+            
+            const before = currentValue.slice(0, startPos);
+            const after = currentValue.slice(currentPos);
+            const newValue = before + content + after;
+            
+            inputEl.value = newValue;
+            
+            // Focus and set cursor
+            if (inputEl.focus) inputEl.focus();
+            if (inputEl.setSelectionRange) {
+                const newPos = before.length + content.length;
+                inputEl.setSelectionRange(newPos, newPos);
+            }
+            
+            // Dispatch events
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Used direct value manipulation method');
+            return true;
+        }
+        
+        // Method 2: Try textContent manipulation
+        if (target.textContent !== null) {
+            const currentText = target.textContent || '';
+            const before = currentText.slice(0, startPos);
+            const after = currentText.slice(Math.max(startPos + snippetModeState.searchQuery.length + 2, before.length)); // +2 for "x/"
+            
+            target.textContent = before + content + after;
+            
+            // Try to set focus and cursor
+            if (target.focus) target.focus();
+            
+            // Dispatch events
+            target.dispatchEvent(new InputEvent('input', {
+                bubbles: true,
+                cancelable: true,
+                inputType: 'insertText',
+                data: content
+            }));
+            
+            console.log('✅ Used textContent manipulation method');
+            return true;
+        }
+        
+        // Method 3: Try innerHTML as last resort
+        if (target.innerHTML !== undefined) {
+            const currentHTML = target.innerHTML;
+            // Simple text replacement for innerHTML
+            const before = currentHTML.slice(0, startPos);
+            const after = currentHTML.slice(Math.max(startPos + snippetModeState.searchQuery.length + 2, before.length));
+            
+            target.innerHTML = before + content + after;
+            
+            if (target.focus) target.focus();
+            
+            target.dispatchEvent(new InputEvent('input', {
+                bubbles: true,
+                cancelable: true,
+                inputType: 'insertText',
+                data: content
+            }));
+            
+            console.log('✅ Used innerHTML manipulation method');
+            return true;
+        }
+        
+        console.log('❌ No suitable insertion method found');
+        return false;
+        
+    } catch (error) {
+        console.error('❌ Error in safe contentEditable insertion:', error);
+        return false;
+    }
+}
+
+// Insert the selected snippet (enhanced for Claude.ai)
+function insertSnippet(snippet: any, isMagicInjection: boolean = false) {
     if (!snippetModeState.target) return;
     
     const target = snippetModeState.target;
     const startPos = snippetModeState.startPosition;
     const content = snippet.content || '';
     
-    console.log('🎯 Inserting snippet:', snippet.title);
+    console.log('🎯 Inserting snippet:', snippet.title, isMagicInjection ? '(Magic Injection)' : '(Manual)');
     
     try {
         if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
@@ -489,31 +518,27 @@ function insertSnippet(snippet: any) {
             inputEl.dispatchEvent(new Event('change', { bubbles: true }));
             
         } else if (target.isContentEditable) {
-            // Handle contenteditable
-            const sel = window.getSelection();
-            if (!sel || !sel.focusNode) return;
-            
-            const textNode = sel.focusNode as Text;
-            const text = textNode.textContent || '';
-            const currentPos = sel.focusOffset;
-            
-            // Remove x/ and search query
-            const before = text.slice(0, startPos);
-            const after = text.slice(currentPos);
-            
-            textNode.textContent = before + content + after;
-            
-            // Set cursor position
-            const newOffset = before.length + content.length;
-            sel.collapse(textNode, newOffset);
-            
-            // Dispatch events
-            target.dispatchEvent(new InputEvent('input', {
-                bubbles: true,
-                cancelable: true,
-                inputType: 'insertText',
-                data: content
-            }));
+            // Use safe contentEditable insertion for Claude.ai
+            const success = insertIntoContentEditable(target, content, startPos);
+            if (!success) {
+                console.log('⚠️ Fallback: Using basic textContent replacement');
+                const currentText = target.textContent || '';
+                const before = currentText.slice(0, startPos);
+                const after = currentText.slice(startPos + snippetModeState.searchQuery.length + 2); // +2 for "x/"
+                target.textContent = before + content + after;
+                
+                target.dispatchEvent(new InputEvent('input', {
+                    bubbles: true,
+                    cancelable: true,
+                    inputType: 'insertText',
+                    data: content
+                }));
+            }
+        }
+        
+        // Apply border trace effect for magic injections
+        if (isMagicInjection) {
+            applyBorderTraceEffect(target);
         }
         
         console.log('✅ Snippet inserted successfully');
@@ -525,19 +550,23 @@ function insertSnippet(snippet: any) {
     hidePicker();
 }
 
+// Magic injection with border trace effect
+function magicallyInjectSnippet(snippet: any) {
+    console.log('🪄 Starting magical injection with border trace effect');
+    
+    // Insert snippet immediately with magic flag
+    insertSnippet(snippet, true);
+}
+
 // Handle keyboard events in snippet mode
 function handleSnippetModeKeyboard(e: KeyboardEvent) {
     // Handle escape key for both snippet mode and glow pulse mode
     if (e.key === 'Escape') {
         e.preventDefault();
         
-        // Cancel magical injection glow pulse if active
+        // Cancel magical injection if active
         if (snippetModeState.isAnimating) {
-            console.log('🛑 Cancelling magical injection glow pulse');
-            // Remove glow effect from target if present
-            if (snippetModeState.target) {
-                snippetModeState.target.classList.remove('onyx-glow-effect');
-            }
+            console.log('🛑 Cancelling magical injection');
             snippetModeState.isAnimating = false;
             snippetModeState.animationController = undefined;
         }
@@ -611,11 +640,14 @@ document.addEventListener('input', async (e) => {
         currentText = inputEl.value;
         cursorPosition = inputEl.selectionStart || 0;
     } else {
-        const sel = window.getSelection();
-        if (!sel || !sel.focusNode || sel.focusNode.nodeType !== Node.TEXT_NODE) return;
-        
-        currentText = sel.focusNode.textContent || '';
-        cursorPosition = sel.focusOffset;
+        // For contentEditable, try multiple methods to get text
+        if ('value' in target && typeof (target as any).value === 'string') {
+            currentText = (target as any).value;
+            cursorPosition = currentText.length;
+        } else {
+            currentText = target.textContent || target.innerText || '';
+            cursorPosition = currentText.length; // Fallback to end position
+        }
     }
     
     // Check if we should enter snippet mode
@@ -636,54 +668,41 @@ document.addEventListener('input', async (e) => {
         snippetModeState.searchQuery = searchQuery;
         snippetModeState.selectedIndex = 0;
         
-        // Get and filter snippets using new storage architecture
-        chrome.storage.sync.get(null, async (data) => {
-            try {
-                // Get the snippet index
-                const snippetIndex = data['onyx-index'] || [];
-                const allSnippets = [];
+        // Get and filter snippets from storage
+        try {
+            // Load all snippets from storage
+            const allSnippets = await getSnippetsFromStorage();
+            
+            // Filter snippets based on search query
+            snippetModeState.filteredSnippets = filterSnippets(allSnippets, searchQuery);
+            
+            // Check for exact match and trigger magical injection
+            const exactMatch = findExactMatch(allSnippets, searchQuery);
+            if (exactMatch && searchQuery.length > 0) {
+                console.log('🎯 Exact match found for:', searchQuery, '-> triggering magical injection');
                 
-                // Load each snippet individually
-                for (const snippetId of snippetIndex) {
-                    const snippetKey = `snippet-${snippetId}`;
-                    const snippet = data[snippetKey];
-                    if (snippet) {
-                        allSnippets.push(snippet);
-                    }
-                }
-                
-                // Sort by creation date (newest first)
-                allSnippets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                
-                snippetModeState.filteredSnippets = filterSnippets(allSnippets, searchQuery);
-                
-                // Check for exact match and trigger magical injection
-                const exactMatch = checkForExactMatch(searchQuery, snippetModeState.filteredSnippets);
-                if (exactMatch && searchQuery.length > 0) {
-                    console.log('🎯 Exact match found for:', searchQuery, '-> triggering magical injection');
-                    
-                    // Trigger magical injection after a brief delay for smooth UX
-                    setTimeout(() => {
-                        magicalInjectSnippet(exactMatch);
-                    }, 150);
-                    return;
-                }
-                
-                // Update display
-                updatePicker(snippetModeState.filteredSnippets);
-                
-                // Add event listeners if not already added
-                if (!document.getElementById('onyx-picker')) {
-                    setTimeout(() => {
-                        document.addEventListener('click', handleOutsideClick);
-                    }, 0);
-                }
-            } catch (error) {
-                console.error('Error loading snippets in content script:', error);
-                snippetModeState.filteredSnippets = [];
-                updatePicker([]);
+                // Trigger magical injection with border trace effect
+                setTimeout(() => {
+                    console.log('✨ Starting magical injection with border trace');
+                    magicallyInjectSnippet(exactMatch);
+                }, 150);
+                return;
             }
-        });
+            
+            // Update display
+            updatePicker(snippetModeState.filteredSnippets);
+            
+            // Add event listeners if not already added
+            if (!document.getElementById('onyx-picker')) {
+                setTimeout(() => {
+                    document.addEventListener('click', handleOutsideClick);
+                }, 0);
+            }
+        } catch (error) {
+            console.error('Error loading snippets in content script:', error);
+            snippetModeState.filteredSnippets = [];
+            updatePicker([]);
+        }
         
     } else if (snippetModeState.active) {
         // Exit snippet mode if x/ is no longer present
@@ -696,15 +715,65 @@ document.addEventListener('keydown', (e) => {
     handleSnippetModeKeyboard(e);
 }, true);
 
-// Special handling for Enter key to prevent form submission in snippet mode
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && snippetModeState.active && snippetModeState.filteredSnippets.length > 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-    }
-}, true);
+// CLAUDE.AI SPECIFIC: Smart Enter key blocking
+const isClaudeAI = window.location.hostname.includes('claude.ai');
+
+if (isClaudeAI) {
+    console.log('🎯 Claude.ai detected - installing smart Enter key blocking');
+    
+    // Primary blocking layer - highest priority
+    document.addEventListener('keydown', (e) => {
+        // Block Enter when snippet mode is active (whether picker is visible or not)
+        if (e.key === 'Enter' && snippetModeState.active) {
+            console.log('🚫 [Claude] Blocking Enter - snippet mode active');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // If we have snippets and a picker, handle selection
+            if (snippetModeState.filteredSnippets.length > 0 && document.getElementById('onyx-picker')) {
+                const selectedSnippet = snippetModeState.filteredSnippets[snippetModeState.selectedIndex];
+                if (selectedSnippet) {
+                    console.log('🎯 Inserting snippet:', selectedSnippet.title);
+                    insertSnippet(selectedSnippet);
+                }
+            }
+            return false;
+        }
+    }, true);
+    
+    // Secondary blocking - keypress events
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && snippetModeState.active) {
+            console.log('🚫 [Claude] Backup keypress blocking');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }, true);
+    
+    // Tertiary blocking - form submission
+    document.addEventListener('submit', (e) => {
+        if (snippetModeState.active) {
+            console.log('🚫 [Claude] Form submission blocking');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }, true);
+    
+    // Input event blocking for line breaks
+    document.addEventListener('beforeinput', (e) => {
+        if (snippetModeState.active && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) {
+            console.log('🚫 [Claude] BeforeInput line break blocking');
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+}
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
