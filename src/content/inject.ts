@@ -7,13 +7,16 @@ let snippetModeState: {
     selectedIndex: number;
     filteredSnippets: any[];
     textNode?: Node;
+    isAnimating?: boolean;
+    animationController?: AbortController;
 } = {
     active: false,
     target: null,
     startPosition: 0,
     searchQuery: '',
     selectedIndex: 0,
-    filteredSnippets: []
+    filteredSnippets: [],
+    isAnimating: false
 };
 
 // Create or reuse a floating overlay element
@@ -39,7 +42,7 @@ function getPicker(): HTMLElement {
         overflowX: "hidden",
     });
     
-    // Custom scrollbar for dark mode
+    // Custom scrollbar for dark mode and magical animations
     const style = document.createElement('style');
     style.textContent = `
         #onyx-picker::-webkit-scrollbar {
@@ -54,6 +57,51 @@ function getPicker(): HTMLElement {
         }
         #onyx-picker::-webkit-scrollbar-thumb:hover {
             background: #666;
+        }
+        
+        /* Magical auto-complete animations */
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+            25% {
+                box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 12px 4px rgba(255, 0, 0, 0.6);
+            }
+            75% {
+                box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+        
+        .onyx-glow-effect {
+            animation: glowPulse 1000ms ease-in-out !important;
+            border-radius: 4px !important;
+            transition: none !important;
+        }
+        
+        .onyx-exact-match {
+            background: #1a3a1a !important;
+            border-left: 3px solid #ff0000 !important;
+        }
+        
+        .onyx-ready-indicator {
+            position: relative;
+        }
+        
+        .onyx-ready-indicator::after {
+            content: "✨ Ready to inject";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: #ff0000;
+            opacity: 0.8;
         }
     `;
     document.head.appendChild(style);
@@ -74,6 +122,11 @@ function hidePicker() {
         // No background color changes to keep it minimal
     }
     
+    // Cancel any ongoing animation
+    if (snippetModeState.isAnimating && snippetModeState.animationController) {
+        snippetModeState.animationController.abort();
+    }
+    
     // Reset state
     snippetModeState = {
         active: false,
@@ -81,7 +134,8 @@ function hidePicker() {
         startPosition: 0,
         searchQuery: '',
         selectedIndex: 0,
-        filteredSnippets: []
+        filteredSnippets: [],
+        isAnimating: false
     };
     
     // Remove event listeners
@@ -112,6 +166,136 @@ function filterSnippets(snippets: any[], query: string): any[] {
         const bIndex = (b.title || '').toLowerCase().indexOf(lowerQuery);
         return aIndex - bIndex;
     });
+}
+
+// Check for exact match with prompt title
+function checkForExactMatch(searchQuery: string, filteredSnippets: any[]): any | null {
+    if (!searchQuery.trim()) return null;
+    
+    // Case-insensitive exact match for prompt titles
+    const exactMatch = filteredSnippets.find(snippet => 
+        snippet.title.toLowerCase() === searchQuery.toLowerCase().trim()
+    );
+    return exactMatch || null;
+}
+
+// Apply glow pulse effect to target element
+function applyGlowEffect(target: HTMLElement) {
+    if (!target) return;
+    
+    // Add glow class
+    target.classList.add('onyx-glow-effect');
+    
+    // Remove glow class after animation completes
+    setTimeout(() => {
+        target.classList.remove('onyx-glow-effect');
+    }, 1000);
+}
+
+
+// Insert content instantly at cursor position
+function insertContentInstantly(content: string, target: HTMLElement, startPos: number) {
+    if (!target) return;
+    
+    try {
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const inputEl = target as HTMLInputElement | HTMLTextAreaElement;
+            const currentValue = inputEl.value;
+            const currentPos = inputEl.selectionStart || 0;
+            
+            // Remove x/ and search query, then insert content
+            const before = currentValue.slice(0, startPos);
+            const after = currentValue.slice(currentPos);
+            const newValue = before + content + after;
+            
+            inputEl.value = newValue;
+            const newPos = before.length + content.length;
+            inputEl.setSelectionRange(newPos, newPos);
+            
+            // Dispatch events for reactivity
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+            
+        } else if (target.isContentEditable) {
+            const sel = window.getSelection();
+            if (!sel || !sel.focusNode) return;
+            
+            const textNode = sel.focusNode as Text;
+            const text = textNode.textContent || '';
+            const currentPos = sel.focusOffset;
+            
+            // Remove x/ and search query, then insert content
+            const before = text.slice(0, startPos);
+            const after = text.slice(currentPos);
+            
+            textNode.textContent = before + content + after;
+            
+            // Set cursor position after inserted content
+            const newOffset = before.length + content.length;
+            sel.collapse(textNode, newOffset);
+            
+            // Dispatch input event
+            target.dispatchEvent(new InputEvent('input', {
+                bubbles: true,
+                cancelable: true,
+                inputType: 'insertText',
+                data: content
+            }));
+        }
+    } catch (error) {
+        console.error('Error inserting content:', error);
+    }
+}
+
+// Magical instant injection with glow pulse effect
+async function magicalInstantInject(content: string, target: HTMLElement, startPos: number): Promise<void> {
+    try {
+        console.log('✨ Starting magical instant injection');
+        
+        // Insert content instantly
+        insertContentInstantly(content, target, startPos);
+        
+        // Apply glow pulse effect
+        applyGlowEffect(target);
+        
+        console.log('✅ Magical instant injection completed');
+    } catch (error) {
+        console.error('❌ Error during magical instant injection:', error);
+        throw error;
+    }
+}
+
+// Magical snippet injection with instant glow pulse effect
+async function magicalInjectSnippet(snippet: any) {
+    if (!snippetModeState.target || snippetModeState.isAnimating) return;
+    
+    console.log('✨ Starting magical injection:', snippet.title);
+    
+    // Set animation state
+    snippetModeState.isAnimating = true;
+    
+    try {
+        const target = snippetModeState.target;
+        const startPos = snippetModeState.startPosition;
+        const content = snippet.content || '';
+        
+        // Hide picker immediately
+        hidePicker();
+        
+        // Instantly inject content with glow pulse effect
+        await magicalInstantInject(content, target, startPos);
+        
+        console.log('✅ Magical injection completed');
+        
+    } catch (error) {
+        console.error('❌ Error during magical injection:', error);
+    } finally {
+        // Reset animation state after glow pulse completes
+        setTimeout(() => {
+            snippetModeState.isAnimating = false;
+            snippetModeState.animationController = undefined;
+        }, 1050); // Slightly longer than glow pulse duration
+    }
 }
 
 // Highlight matching text in snippet title
@@ -188,14 +372,25 @@ function updatePicker(snippets: any[]) {
         return;
     }
     
+    // Check for exact match
+    const exactMatch = checkForExactMatch(snippetModeState.searchQuery, snippets);
+    
     // Create snippet items (no header for minimal design)
     snippets.forEach((snippet, index) => {
         const item = document.createElement('div');
         item.setAttribute('data-snippet-index', index.toString());
         
+        // Check if this is the exact match
+        const isExactMatch = exactMatch && snippet.id === exactMatch.id;
+        
         // Create highlighted title
         const highlightedTitle = highlightMatch(snippet.title || `Snippet ${index + 1}`, snippetModeState.searchQuery);
         item.innerHTML = `<div>${highlightedTitle}</div>`;
+        
+        // Add exact match styling
+        if (isExactMatch) {
+            item.classList.add('onyx-exact-match', 'onyx-ready-indicator');
+        }
         
         Object.assign(item.style, {
             padding: '10px 16px',
@@ -203,20 +398,22 @@ function updatePicker(snippets: any[]) {
             backgroundColor: index === snippetModeState.selectedIndex ? '#404040' : 'transparent',
             color: '#e5e5e5',
             borderBottom: index < snippets.length - 1 ? '1px solid #333' : 'none',
-            transition: 'background-color 0.15s ease',
+            transition: 'background-color 0.15s ease, border-color 0.15s ease',
             borderRadius: index === 0 ? '8px 8px 0 0' : (index === snippets.length - 1 ? '0 0 8px 8px' : '0')
         });
         
         // Hover effects
         item.addEventListener('mouseenter', () => {
-            item.style.backgroundColor = '#404040';
+            if (!isExactMatch) {
+                item.style.backgroundColor = '#404040';
+            }
             // Update selected index on hover
             snippetModeState.selectedIndex = index;
             updateSelectionVisuals();
         });
         
         item.addEventListener('mouseleave', () => {
-            if (index !== snippetModeState.selectedIndex) {
+            if (index !== snippetModeState.selectedIndex && !isExactMatch) {
                 item.style.backgroundColor = 'transparent';
             }
         });
@@ -330,7 +527,30 @@ function insertSnippet(snippet: any) {
 
 // Handle keyboard events in snippet mode
 function handleSnippetModeKeyboard(e: KeyboardEvent) {
-    if (!snippetModeState.active) return;
+    // Handle escape key for both snippet mode and glow pulse mode
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        
+        // Cancel magical injection glow pulse if active
+        if (snippetModeState.isAnimating) {
+            console.log('🛑 Cancelling magical injection glow pulse');
+            // Remove glow effect from target if present
+            if (snippetModeState.target) {
+                snippetModeState.target.classList.remove('onyx-glow-effect');
+            }
+            snippetModeState.isAnimating = false;
+            snippetModeState.animationController = undefined;
+        }
+        
+        // Hide picker if active
+        if (snippetModeState.active) {
+            hidePicker();
+        }
+        return;
+    }
+    
+    // Only handle other keys if snippet mode is active and not animating
+    if (!snippetModeState.active || snippetModeState.isAnimating) return;
     
     switch (e.key) {
         case 'ArrowDown':
@@ -369,11 +589,6 @@ function handleSnippetModeKeyboard(e: KeyboardEvent) {
                     insertSnippet(selectedSnippet);
                 }
             }
-            break;
-            
-        case 'Escape':
-            e.preventDefault();
-            hidePicker();
             break;
     }
 }
@@ -441,6 +656,18 @@ document.addEventListener('input', async (e) => {
                 allSnippets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 
                 snippetModeState.filteredSnippets = filterSnippets(allSnippets, searchQuery);
+                
+                // Check for exact match and trigger magical injection
+                const exactMatch = checkForExactMatch(searchQuery, snippetModeState.filteredSnippets);
+                if (exactMatch && searchQuery.length > 0) {
+                    console.log('🎯 Exact match found for:', searchQuery, '-> triggering magical injection');
+                    
+                    // Trigger magical injection after a brief delay for smooth UX
+                    setTimeout(() => {
+                        magicalInjectSnippet(exactMatch);
+                    }, 150);
+                    return;
+                }
                 
                 // Update display
                 updatePicker(snippetModeState.filteredSnippets);

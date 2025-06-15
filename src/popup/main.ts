@@ -383,6 +383,47 @@ class OnyxPopup extends LitElement {
       }
     }
 
+    /* Space restriction warning */
+    .space-warning {
+      font-size: 0.6875rem;
+      color: #ef4444;
+      margin-top: 0.25rem;
+      line-height: 1.3;
+      padding: 0.25rem 0.5rem;
+      background: #2d1b1b;
+      border: 1px solid #ef4444;
+      border-radius: 4px;
+      animation: slideInWarning 0.2s ease-out;
+    }
+
+    @keyframes slideInWarning {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+    /* Subtle trigger hint in tagline */
+    .tagline .trigger-hint {
+      color: #666;
+      font-size: 0.6875rem;
+      margin-left: 0.5rem;
+    }
+
+    .tagline .trigger-hint code {
+      background: #333;
+      padding: 0.125rem 0.25rem;
+      border-radius: 3px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      font-size: 0.6rem;
+      color: #ff0000;
+    }
+
 
   `;
 
@@ -409,6 +450,12 @@ class OnyxPopup extends LitElement {
 
   @state()
   private showSuccess = false;
+
+  @state()
+  private originalScrollPosition = 0;
+
+  @state()
+  private showSpaceWarning = false;
 
 
   async connectedCallback() {
@@ -449,6 +496,20 @@ class OnyxPopup extends LitElement {
     this.requestUpdate();
   }
 
+  private handleTitleInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    this.newTitle = input.value;
+    
+    // Check if user entered a space and show warning
+    if (input.value.includes(' ')) {
+      this.showSpaceWarning = true;
+    } else {
+      this.showSpaceWarning = false;
+    }
+    
+    this.requestUpdate();
+  }
+
 
   private clearMessages() {
     this.errorMessage = "";
@@ -480,6 +541,7 @@ class OnyxPopup extends LitElement {
     this.newTitle = "";
     this.newContent = "";
     this.editingId = null;
+    this.showSpaceWarning = false;
     
     // Force immediate DOM clearing to ensure inputs are visually cleared
     setTimeout(() => {
@@ -497,9 +559,6 @@ class OnyxPopup extends LitElement {
       }
     }, 0);
     
-    // Scroll back to top to ensure search bar is fully visible
-    this.scrollToTop();
-    
     this.requestUpdate();
   }
 
@@ -512,11 +571,15 @@ class OnyxPopup extends LitElement {
     }, 0);
   }
 
-  private scrollToTop() {
+  private scrollToOriginalPosition() {
     setTimeout(() => {
       const content = this.shadowRoot?.querySelector('.content');
       if (content) {
-        content.scrollTo({ top: 0, behavior: 'smooth' });
+        // Restore to the exact scroll position before edit mode
+        content.scrollTo({ 
+          top: this.originalScrollPosition, 
+          behavior: 'smooth' 
+        });
       }
     }, 0);
   }
@@ -528,6 +591,12 @@ class OnyxPopup extends LitElement {
     if (!title || !content) return;
 
     this.clearMessages();
+
+    // Validate that title doesn't contain spaces (for x/ trigger compatibility)
+    if (title.includes(' ')) {
+      this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');
+      return;
+    }
 
     try {
       if (this.editingId) {
@@ -590,6 +659,11 @@ class OnyxPopup extends LitElement {
       this.showSuccessMessage();
       
       this.requestUpdate();
+      
+      // Restore original scroll position after all updates are complete
+      setTimeout(() => {
+        this.scrollToOriginalPosition();
+      }, 150);
     } catch (error) {
       console.error('Error saving snippet:', error);
       this.showError('Failed to save prompt. Please try again.');
@@ -617,6 +691,13 @@ class OnyxPopup extends LitElement {
   private handleEditSnippet(id: string) {
     const toEdit = this.snippets.find(s => s.id === id);
     if (!toEdit) return;
+    
+    // Capture current scroll position before entering edit mode
+    const content = this.shadowRoot?.querySelector('.content');
+    if (content) {
+      this.originalScrollPosition = content.scrollTop;
+    }
+    
     this.newTitle = toEdit.title;
     this.newContent = toEdit.content;
     this.editingId = id;
@@ -626,13 +707,20 @@ class OnyxPopup extends LitElement {
 
   private handleCancelEdit() {
     this.clearForm();
+    // Restore original scroll position after clearing form when canceling edit
+    setTimeout(() => {
+      this.scrollToOriginalPosition();
+    }, 100);
   }
 
   render() {
     return html`
       <div class="header">
         <h1>Onyx</h1>
-        <p class="tagline">Minimal. Fast. Ready.</p>
+        <p class="tagline">
+          Minimal. Fast. Ready.
+          <span class="trigger-hint">Use <code>x/</code> to trigger</span>
+        </p>
       </div>
       
       <div class="content">
@@ -666,9 +754,14 @@ class OnyxPopup extends LitElement {
             type="text"
             placeholder="Prompt title"
             .value=${this.newTitle}
-            @input=${(e: any) => (this.newTitle = e.target.value)}
+            @input=${this.handleTitleInput}
             required
           />
+          ${this.showSpaceWarning ? html`
+            <div class="space-warning">
+              Prompt titles cannot contain spaces. Use underscores or hyphens instead
+            </div>
+          ` : ''}
           <div>
             <textarea
               rows="3"
@@ -681,7 +774,7 @@ class OnyxPopup extends LitElement {
               required
             ></textarea>
           </div>
-          <button type="submit">
+          <button type="submit" style="color: #FF0000;">
             ${this.editingId ? "Update Prompt" : "Add Prompt"}
           </button>
           ${this.editingId ? html`
