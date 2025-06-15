@@ -11,7 +11,7 @@ class OnyxPopup extends LitElement {
       color: #e5e5e5;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       width: 400px;
-      height: 600px;
+      height: 450px;
       margin: 0;
       position: relative;
       overflow: hidden;
@@ -46,7 +46,7 @@ class OnyxPopup extends LitElement {
       margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
-      color: #fff;
+      color: #FF0000;
       letter-spacing: -0.02em;
     }
 
@@ -300,7 +300,7 @@ class OnyxPopup extends LitElement {
     /* Empty state */
     .empty-state {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       color: #666;
     }
 
@@ -340,9 +340,47 @@ class OnyxPopup extends LitElement {
     }
 
     .message.success {
-      background: #1b2d1b;
-      border: 1px solid #22c55e;
-      color: #86efac;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e5e5e5;
+      font-weight: 500;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      backdrop-filter: blur(8px);
+      animation: slideInSuccess 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message.success::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 1.5s ease-in-out;
+    }
+
+    @keyframes slideInSuccess {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
     }
 
 
@@ -459,6 +497,9 @@ class OnyxPopup extends LitElement {
       }
     }, 0);
     
+    // Scroll back to top to ensure search bar is fully visible
+    this.scrollToTop();
+    
     this.requestUpdate();
   }
 
@@ -467,6 +508,15 @@ class OnyxPopup extends LitElement {
       const form = this.shadowRoot?.querySelector('form');
       if (form) {
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 0);
+  }
+
+  private scrollToTop() {
+    setTimeout(() => {
+      const content = this.shadowRoot?.querySelector('.content');
+      if (content) {
+        content.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }, 0);
   }
@@ -607,7 +657,7 @@ class OnyxPopup extends LitElement {
         
         ${this.showSuccess ? html`
           <div class="message success">
-            ✅ Prompt saved successfully!
+            Prompt saved
           </div>
         ` : ''}
 

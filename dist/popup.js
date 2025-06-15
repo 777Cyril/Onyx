@@ -1,4 +1,4 @@
-var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configurable:!0,writable:!0,value:e}):d[o]=e;var n=(d,o,e)=>b(d,typeof o!="symbol"?o+"":o,e);import{i as f,a as w,g as h,v as y,u as x,c as v,e as S,d as k,x as l,r as p}from"./assets/storage-DNQ-ueQ6.js";var C=Object.defineProperty,c=(d,o,e,t)=>{for(var r=void 0,i=d.length-1,s;i>=0;i--)(s=d[i])&&(r=s(o,e,r)||r);return r&&C(o,e,r),r};class a extends f{constructor(){super(...arguments);n(this,"snippets",[]);n(this,"newTitle","");n(this,"newContent","");n(this,"editingId",null);n(this,"searchQuery","");n(this,"filteredSnippets",[]);n(this,"errorMessage","");n(this,"showSuccess",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const r=(t.title||"").toLowerCase().includes(e),i=(t.content||"").toLowerCase().includes(e);return r||i})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,setTimeout(()=>{var r,i;const e=(r=this.shadowRoot)==null?void 0:r.querySelector('form input[type="text"]'),t=(i=this.shadowRoot)==null?void 0:i.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),r=this.newContent.trim();if(!(!t||!r)){this.clearMessages();try{if(this.editingId){const i={id:this.editingId,title:t,content:r,createdAt:Date.now()},s=await y(i);if(!s.isValid){if(s.projectedSize>s.maxSize){const u=s.projectedSize-s.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${u} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${s.maxItems}).`);return}await x(i),this.snippets=await h()}else{const i={id:crypto.randomUUID(),title:t,content:r,createdAt:Date.now()},s=await v(i);if(!s.isValid){if(s.projectedSize>s.maxSize){const u=s.projectedSize-s.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${u} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${s.maxItems}).`);return}await S(i),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate()}catch(i){console.error("Error saving snippet:",i),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(i=>i.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(i){console.error("Error deleting snippet:",i)}}handleEditSnippet(e){const t=this.snippets.find(r=>r.id===e);t&&(this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm())}handleCancelEdit(){this.clearForm()}render(){return l`
+var g=Object.defineProperty;var b=(l,s,e)=>s in l?g(l,s,{enumerable:!0,configurable:!0,writable:!0,value:e}):l[s]=e;var n=(l,s,e)=>b(l,typeof s!="symbol"?s+"":s,e);import{i as f,a as w,g as h,v as y,u as x,c as v,e as S,d as k,x as d,r as p}from"./assets/storage-DNQ-ueQ6.js";var C=Object.defineProperty,c=(l,s,e,t)=>{for(var i=void 0,r=l.length-1,o;r>=0;r--)(o=l[r])&&(i=o(s,e,i)||i);return i&&C(s,e,i),i};class a extends f{constructor(){super(...arguments);n(this,"snippets",[]);n(this,"newTitle","");n(this,"newContent","");n(this,"editingId",null);n(this,"searchQuery","");n(this,"filteredSnippets",[]);n(this,"errorMessage","");n(this,"showSuccess",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const i=(t.title||"").toLowerCase().includes(e),r=(t.content||"").toLowerCase().includes(e);return i||r})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,setTimeout(()=>{var i,r;const e=(i=this.shadowRoot)==null?void 0:i.querySelector('form input[type="text"]'),t=(r=this.shadowRoot)==null?void 0:r.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.scrollToTop(),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToTop(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");e&&e.scrollTo({top:0,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),i=this.newContent.trim();if(!(!t||!i)){this.clearMessages();try{if(this.editingId){const r={id:this.editingId,title:t,content:i,createdAt:Date.now()},o=await y(r);if(!o.isValid){if(o.projectedSize>o.maxSize){const m=o.projectedSize-o.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${o.maxItems}).`);return}await x(r),this.snippets=await h()}else{const r={id:crypto.randomUUID(),title:t,content:i,createdAt:Date.now()},o=await v(r);if(!o.isValid){if(o.projectedSize>o.maxSize){const m=o.projectedSize-o.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${o.maxItems}).`);return}await S(r),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate()}catch(r){console.error("Error saving snippet:",r),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(r=>r.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(r){console.error("Error deleting snippet:",r)}}handleEditSnippet(e){const t=this.snippets.find(i=>i.id===e);t&&(this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm())}handleCancelEdit(){this.clearForm()}render(){return d`
       <div class="header">
         <h1>Onyx</h1>
         <p class="tagline">Minimal. Fast. Ready.</p>
@@ -18,15 +18,15 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
 
 
         <!-- Error/Success messages -->
-        ${this.errorMessage?l`
+        ${this.errorMessage?d`
           <div class="message error">
             ${this.errorMessage}
           </div>
         `:""}
         
-        ${this.showSuccess?l`
+        ${this.showSuccess?d`
           <div class="message success">
-            ✅ Prompt saved successfully!
+            Prompt saved
           </div>
         `:""}
 
@@ -50,7 +50,7 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
           <button type="submit">
             ${this.editingId?"Update Prompt":"Add Prompt"}
           </button>
-          ${this.editingId?l`
+          ${this.editingId?d`
             <button 
               type="button" 
               @click=${this.handleCancelEdit}
@@ -67,22 +67,22 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
             <span class="snippet-count">${this.filteredSnippets.length}</span>
           </div>
           
-          ${this.filteredSnippets.length===0&&this.snippets.length===0?l`
+          ${this.filteredSnippets.length===0&&this.snippets.length===0?d`
             <div class="empty-state">
               <p class="empty-text">
                 No snippets yet.<br>
                 Create your first snippet above.
               </p>
             </div>
-          `:this.filteredSnippets.length===0&&this.searchQuery?l`
+          `:this.filteredSnippets.length===0&&this.searchQuery?d`
             <div class="empty-state">
               <p class="empty-text">
                 No prompts match your search.
               </p>
             </div>
-          `:l`
+          `:d`
             <ul>
-              ${this.filteredSnippets.map(e=>l`
+              ${this.filteredSnippets.map(e=>d`
                   <li>
                     <div class="snippet-header">
                       <h3 class="snippet-title">${e.title}</h3>
@@ -120,7 +120,7 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
       color: #e5e5e5;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       width: 400px;
-      height: 600px;
+      height: 450px;
       margin: 0;
       position: relative;
       overflow: hidden;
@@ -155,7 +155,7 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
       margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
-      color: #fff;
+      color: #FF0000;
       letter-spacing: -0.02em;
     }
 
@@ -409,7 +409,7 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
     /* Empty state */
     .empty-state {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       color: #666;
     }
 
@@ -449,10 +449,48 @@ var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configura
     }
 
     .message.success {
-      background: #1b2d1b;
-      border: 1px solid #22c55e;
-      color: #86efac;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e5e5e5;
+      font-weight: 500;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      backdrop-filter: blur(8px);
+      animation: slideInSuccess 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message.success::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 1.5s ease-in-out;
+    }
+
+    @keyframes slideInSuccess {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
     }
 
 
-  `);c([p()],a.prototype,"snippets");c([p()],a.prototype,"newTitle");c([p()],a.prototype,"newContent");c([p()],a.prototype,"editingId");c([p()],a.prototype,"searchQuery");c([p()],a.prototype,"filteredSnippets");c([p()],a.prototype,"errorMessage");c([p()],a.prototype,"showSuccess");customElements.define("onyx-popup",a);const m=document.getElementById("app");m&&m.appendChild(document.createElement("onyx-popup"));
+  `);c([p()],a.prototype,"snippets");c([p()],a.prototype,"newTitle");c([p()],a.prototype,"newContent");c([p()],a.prototype,"editingId");c([p()],a.prototype,"searchQuery");c([p()],a.prototype,"filteredSnippets");c([p()],a.prototype,"errorMessage");c([p()],a.prototype,"showSuccess");customElements.define("onyx-popup",a);const u=document.getElementById("app");u&&u.appendChild(document.createElement("onyx-popup"));
