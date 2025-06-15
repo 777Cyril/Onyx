@@ -133,8 +133,26 @@ class OnyxOptions extends LitElement {
       this.snippets = updated;
     }
 
+    // Clear state variables
     this.newTitle = "";
     this.newContent = "";
+    
+    // Force immediate DOM clearing to ensure inputs are visually cleared
+    setTimeout(() => {
+      // Use more specific selector to target the form inputs
+      const titleInput = this.shadowRoot?.querySelector('form input[type="text"]') as HTMLInputElement;
+      const contentTextarea = this.shadowRoot?.querySelector('form textarea') as HTMLTextAreaElement;
+      
+      if (titleInput) {
+        titleInput.value = "";
+        titleInput.blur(); // Remove focus to prevent cached values
+      }
+      if (contentTextarea) {
+        contentTextarea.value = "";
+        contentTextarea.blur(); // Remove focus to prevent cached values
+      }
+    }, 0);
+    
     this.requestUpdate();
   }
 
