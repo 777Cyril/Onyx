@@ -1,4 +1,4 @@
-var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configurable:!0,writable:!0,value:t}):o[n]=t;var l=(o,n,t)=>g(o,typeof n!="symbol"?n+"":n,t);import{i as f,a as y,g as m,x as d,r as c}from"./assets/storage-mOLm7AdV.js";var w=Object.defineProperty,h=(o,n,t,e)=>{for(var i=void 0,r=o.length-1,s;r>=0;r--)(s=o[r])&&(i=s(n,t,i)||i);return i&&w(n,t,i),i};class p extends f{constructor(){super(...arguments);l(this,"snippets",[]);l(this,"newTitle","");l(this,"newContent","");l(this,"editingId",null);l(this,"searchQuery","");l(this,"filteredSnippets",[])}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await m(),this.filterSnippets(),this.requestUpdate()}catch(t){console.error("Error loading snippets:",t),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const t=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(e=>{const i=(e.title||"").toLowerCase().includes(t),r=(e.content||"").toLowerCase().includes(t);return i||r})}handleSearch(t){const e=t.target;this.searchQuery=e.value,this.filterSnippets(),this.requestUpdate()}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.requestUpdate()}scrollToForm(){setTimeout(()=>{var e;const t=(e=this.shadowRoot)==null?void 0:e.querySelector("form");t&&t.scrollIntoView({behavior:"smooth",block:"start"})},0)}async handleAddSnippet(t){t.preventDefault();const e=this.newTitle.trim(),i=this.newContent.trim();if(!(!e||!i))try{if(this.editingId){const s=(await m()).map(a=>a.id===this.editingId?{...a,title:e,content:i}:a);await chrome.storage.sync.set({"onyx-snippets":s}),this.snippets=s}else{const r={id:crypto.randomUUID(),title:e,content:i,createdAt:Date.now()},a=[...await m(),r];await chrome.storage.sync.set({"onyx-snippets":a}),this.snippets=a}this.clearForm(),this.filterSnippets(),this.requestUpdate()}catch(r){console.error("Error saving snippet:",r)}}async handleDeleteSnippet(t){const e=this.snippets.find(r=>r.id===t);if(!(!e||!confirm(`Delete "${e.title}"?`)))try{const s=(await m()).filter(a=>a.id!==t);await chrome.storage.sync.set({"onyx-snippets":s}),this.snippets=s,this.filterSnippets(),this.requestUpdate()}catch(r){console.error("Error deleting snippet:",r)}}handleEditSnippet(t){const e=this.snippets.find(i=>i.id===t);e&&(this.newTitle=e.title,this.newContent=e.content,this.editingId=t,this.requestUpdate(),this.scrollToForm())}handleCancelEdit(){this.clearForm()}render(){return d`
+var g=Object.defineProperty;var b=(d,o,e)=>o in d?g(d,o,{enumerable:!0,configurable:!0,writable:!0,value:e}):d[o]=e;var n=(d,o,e)=>b(d,typeof o!="symbol"?o+"":o,e);import{i as f,a as w,g as h,v as y,u as x,c as v,e as S,d as k,x as l,r as p}from"./assets/storage-DNQ-ueQ6.js";var C=Object.defineProperty,c=(d,o,e,t)=>{for(var r=void 0,i=d.length-1,s;i>=0;i--)(s=d[i])&&(r=s(o,e,r)||r);return r&&C(o,e,r),r};class a extends f{constructor(){super(...arguments);n(this,"snippets",[]);n(this,"newTitle","");n(this,"newContent","");n(this,"editingId",null);n(this,"searchQuery","");n(this,"filteredSnippets",[]);n(this,"errorMessage","");n(this,"showSuccess",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const r=(t.title||"").toLowerCase().includes(e),i=(t.content||"").toLowerCase().includes(e);return r||i})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,setTimeout(()=>{var r,i;const e=(r=this.shadowRoot)==null?void 0:r.querySelector('form input[type="text"]'),t=(i=this.shadowRoot)==null?void 0:i.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),r=this.newContent.trim();if(!(!t||!r)){this.clearMessages();try{if(this.editingId){const i={id:this.editingId,title:t,content:r,createdAt:Date.now()},s=await y(i);if(!s.isValid){if(s.projectedSize>s.maxSize){const u=s.projectedSize-s.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${u} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${s.maxItems}).`);return}await x(i),this.snippets=await h()}else{const i={id:crypto.randomUUID(),title:t,content:r,createdAt:Date.now()},s=await v(i);if(!s.isValid){if(s.projectedSize>s.maxSize){const u=s.projectedSize-s.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${u} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${s.maxItems}).`);return}await S(i),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate()}catch(i){console.error("Error saving snippet:",i),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(i=>i.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(i){console.error("Error deleting snippet:",i)}}handleEditSnippet(e){const t=this.snippets.find(r=>r.id===e);t&&(this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm())}handleCancelEdit(){this.clearForm()}render(){return l`
       <div class="header">
         <h1>Onyx</h1>
         <p class="tagline">Minimal. Fast. Ready.</p>
@@ -16,30 +16,41 @@ var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configura
           />
         </div>
 
+
+        <!-- Error/Success messages -->
+        ${this.errorMessage?l`
+          <div class="message error">
+            ${this.errorMessage}
+          </div>
+        `:""}
+        
+        ${this.showSuccess?l`
+          <div class="message success">
+            ✅ Prompt saved successfully!
+          </div>
+        `:""}
+
         <form @submit=${this.handleAddSnippet} class=${this.editingId?"editing":""}>
-          ${this.editingId?d`
-            <div class="edit-indicator">
-              Editing snippet
-            </div>
-          `:""}
           <input
             type="text"
             placeholder="Prompt title"
             .value=${this.newTitle}
-            @input=${t=>this.newTitle=t.target.value}
+            @input=${e=>this.newTitle=e.target.value}
             required
           />
-          <textarea
-            rows="3"
-            placeholder="Prompt content"
-            .value=${this.newContent}
-            @input=${t=>this.newContent=t.target.value}
-            required
-          ></textarea>
+          <div>
+            <textarea
+              rows="3"
+              placeholder="Prompt content"
+              .value=${this.newContent}
+              @input=${e=>{this.newContent=e.target.value,this.requestUpdate()}}
+              required
+            ></textarea>
+          </div>
           <button type="submit">
             ${this.editingId?"Update Prompt":"Add Prompt"}
           </button>
-          ${this.editingId?d`
+          ${this.editingId?l`
             <button 
               type="button" 
               @click=${this.handleCancelEdit}
@@ -56,29 +67,29 @@ var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configura
             <span class="snippet-count">${this.filteredSnippets.length}</span>
           </div>
           
-          ${this.filteredSnippets.length===0&&this.snippets.length===0?d`
+          ${this.filteredSnippets.length===0&&this.snippets.length===0?l`
             <div class="empty-state">
               <p class="empty-text">
                 No snippets yet.<br>
                 Create your first snippet above.
               </p>
             </div>
-          `:this.filteredSnippets.length===0&&this.searchQuery?d`
+          `:this.filteredSnippets.length===0&&this.searchQuery?l`
             <div class="empty-state">
               <p class="empty-text">
                 No prompts match your search.
               </p>
             </div>
-          `:d`
+          `:l`
             <ul>
-              ${this.filteredSnippets.map(t=>d`
+              ${this.filteredSnippets.map(e=>l`
                   <li>
                     <div class="snippet-header">
-                      <h3 class="snippet-title">${t.title}</h3>
+                      <h3 class="snippet-title">${e.title}</h3>
                       <div class="actions">
                         <button
                           class="action-btn edit"
-                          @click=${()=>this.handleEditSnippet(t.id)}
+                          @click=${()=>this.handleEditSnippet(e.id)}
                           title="Edit snippet"
                         >
                           <svg class="icon-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -88,21 +99,21 @@ var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configura
                         </button>
                         <button
                           class="action-btn delete"
-                          @click=${()=>this.handleDeleteSnippet(t.id)}
+                          @click=${()=>this.handleDeleteSnippet(e.id)}
                           title="Delete snippet"
                         >
                           🗑️
                         </button>
                       </div>
                     </div>
-                    <p class="snippet-content">${t.content}</p>
+                    <p class="snippet-content">${e.content}</p>
                   </li>
                 `)}
             </ul>
           `}
         </div>
       </div>
-    `}}l(p,"styles",y`
+    `}}n(a,"styles",w`
     :host {
       display: block;
       background: #1a1a1a;
@@ -413,24 +424,6 @@ var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configura
       background: #1a1a1a;
     }
 
-    .edit-indicator {
-      font-size: 0.75rem;
-      color: #000;
-      margin-bottom: 0;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .edit-indicator::before {
-      content: '';
-      width: 4px;
-      height: 4px;
-      background: #000;
-      border-radius: 50%;
-      display: inline-block;
-    }
 
     /* SVG icon styles */
     .icon-edit {
@@ -439,4 +432,27 @@ var b=Object.defineProperty;var g=(o,n,t)=>n in o?b(o,n,{enumerable:!0,configura
       fill: none;
       stroke: currentColor;
     }
-  `);h([c()],p.prototype,"snippets");h([c()],p.prototype,"newTitle");h([c()],p.prototype,"newContent");h([c()],p.prototype,"editingId");h([c()],p.prototype,"searchQuery");h([c()],p.prototype,"filteredSnippets");customElements.define("onyx-popup",p);const u=document.getElementById("app");u&&u.appendChild(document.createElement("onyx-popup"));
+
+    /* Message styles */
+    .message {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+
+    .message.error {
+      background: #2d1b1b;
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    .message.success {
+      background: #1b2d1b;
+      border: 1px solid #22c55e;
+      color: #86efac;
+    }
+
+
+  `);c([p()],a.prototype,"snippets");c([p()],a.prototype,"newTitle");c([p()],a.prototype,"newContent");c([p()],a.prototype,"editingId");c([p()],a.prototype,"searchQuery");c([p()],a.prototype,"filteredSnippets");c([p()],a.prototype,"errorMessage");c([p()],a.prototype,"showSuccess");customElements.define("onyx-popup",a);const m=document.getElementById("app");m&&m.appendChild(document.createElement("onyx-popup"));

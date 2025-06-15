@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { state } from "lit/decorators.js";
-import { getSnippets } from "../storage";
+import { getSnippets, addSnippet, updateSnippet, deleteSnippet, validateStorageSize, validateStorageUpdateSize } from "../storage";
 
 
 class OnyxPopup extends LitElement {
@@ -315,24 +315,6 @@ class OnyxPopup extends LitElement {
       background: #1a1a1a;
     }
 
-    .edit-indicator {
-      font-size: 0.75rem;
-      color: #000;
-      margin-bottom: 0;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .edit-indicator::before {
-      content: '';
-      width: 4px;
-      height: 4px;
-      background: #000;
-      border-radius: 50%;
-      display: inline-block;
-    }
 
     /* SVG icon styles */
     .icon-edit {
@@ -341,6 +323,29 @@ class OnyxPopup extends LitElement {
       fill: none;
       stroke: currentColor;
     }
+
+    /* Message styles */
+    .message {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+
+    .message.error {
+      background: #2d1b1b;
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+
+    .message.success {
+      background: #1b2d1b;
+      border: 1px solid #22c55e;
+      color: #86efac;
+    }
+
+
   `;
 
   @state()
@@ -360,6 +365,13 @@ class OnyxPopup extends LitElement {
 
   @state()
   private filteredSnippets: any[] = [];
+
+  @state()
+  private errorMessage = "";
+
+  @state()
+  private showSuccess = false;
+
 
   async connectedCallback() {
     super.connectedCallback();
@@ -397,6 +409,32 @@ class OnyxPopup extends LitElement {
     this.searchQuery = input.value;
     this.filterSnippets();
     this.requestUpdate();
+  }
+
+
+  private clearMessages() {
+    this.errorMessage = "";
+    this.showSuccess = false;
+  }
+
+  private showError(message: string) {
+    this.errorMessage = message;
+    this.showSuccess = false;
+    // Auto-clear error after 5 seconds
+    setTimeout(() => {
+      this.errorMessage = "";
+      this.requestUpdate();
+    }, 5000);
+  }
+
+  private showSuccessMessage() {
+    this.showSuccess = true;
+    this.errorMessage = "";
+    // Auto-clear success after 3 seconds
+    setTimeout(() => {
+      this.showSuccess = false;
+      this.requestUpdate();
+    }, 3000);
   }
 
   private clearForm() {
@@ -439,15 +477,33 @@ class OnyxPopup extends LitElement {
     const content = this.newContent.trim();
     if (!title || !content) return;
 
+    this.clearMessages();
+
     try {
       if (this.editingId) {
         // Update existing snippet
-        const all = await getSnippets();
-        const updated = all.map(s =>
-          s.id === this.editingId ? { ...s, title, content } : s
-        );
-        await chrome.storage.sync.set({ "onyx-snippets": updated });
-        this.snippets = updated;
+        const updatedSnippet = {
+          id: this.editingId,
+          title,
+          content,
+          createdAt: Date.now()
+        };
+
+        // Validate storage size for update
+        const validation = await validateStorageUpdateSize(updatedSnippet);
+        if (!validation.isValid) {
+          if (validation.projectedSize > validation.maxSize) {
+            const sizeDiff = validation.projectedSize - validation.maxSize;
+            this.showError(`Prompt too large! Exceeds individual item limit by ${sizeDiff} bytes. Try shortening the content.`);
+          } else {
+            this.showError(`Cannot update: would exceed maximum number of items (${validation.maxItems}).`);
+          }
+          return;
+        }
+
+        // Update using new storage method
+        await updateSnippet(updatedSnippet);
+        this.snippets = await getSnippets();
       } else {
         // Add new snippet
         const newSnippet = {
@@ -456,10 +512,22 @@ class OnyxPopup extends LitElement {
           content,
           createdAt: Date.now()
         };
-        const all = await getSnippets();
-        const updated = [...all, newSnippet];
-        await chrome.storage.sync.set({ "onyx-snippets": updated });
-        this.snippets = updated;
+
+        // Validate storage size for new snippet
+        const validation = await validateStorageSize(newSnippet);
+        if (!validation.isValid) {
+          if (validation.projectedSize > validation.maxSize) {
+            const sizeDiff = validation.projectedSize - validation.maxSize;
+            this.showError(`Prompt too large! Exceeds individual item limit by ${sizeDiff} bytes. Try shortening the content.`);
+          } else {
+            this.showError(`Cannot add prompt: would exceed maximum number of items (${validation.maxItems}).`);
+          }
+          return;
+        }
+
+        // Add using new storage method
+        await addSnippet(newSnippet);
+        this.snippets = await getSnippets();
       }
 
       // Clear form fields using dedicated method
@@ -467,9 +535,14 @@ class OnyxPopup extends LitElement {
       
       // Update filtered list
       this.filterSnippets();
+      
+      // Show success message
+      this.showSuccessMessage();
+      
       this.requestUpdate();
     } catch (error) {
       console.error('Error saving snippet:', error);
+      this.showError('Failed to save prompt. Please try again.');
     }
   }
 
@@ -481,10 +554,9 @@ class OnyxPopup extends LitElement {
     if (!confirmed) return;
 
     try {
-      const all = await getSnippets();
-      const updated = all.filter(s => s.id !== id);
-      await chrome.storage.sync.set({ 'onyx-snippets': updated });
-      this.snippets = updated;
+      // Delete using new storage method
+      await deleteSnippet(id);
+      this.snippets = await getSnippets();
       this.filterSnippets();
       this.requestUpdate();
     } catch (error) {
@@ -525,12 +597,21 @@ class OnyxPopup extends LitElement {
           />
         </div>
 
+
+        <!-- Error/Success messages -->
+        ${this.errorMessage ? html`
+          <div class="message error">
+            ${this.errorMessage}
+          </div>
+        ` : ''}
+        
+        ${this.showSuccess ? html`
+          <div class="message success">
+            ✅ Prompt saved successfully!
+          </div>
+        ` : ''}
+
         <form @submit=${this.handleAddSnippet} class=${this.editingId ? 'editing' : ''}>
-          ${this.editingId ? html`
-            <div class="edit-indicator">
-              Editing snippet
-            </div>
-          ` : ''}
           <input
             type="text"
             placeholder="Prompt title"
@@ -538,13 +619,18 @@ class OnyxPopup extends LitElement {
             @input=${(e: any) => (this.newTitle = e.target.value)}
             required
           />
-          <textarea
-            rows="3"
-            placeholder="Prompt content"
-            .value=${this.newContent}
-            @input=${(e: any) => (this.newContent = e.target.value)}
-            required
-          ></textarea>
+          <div>
+            <textarea
+              rows="3"
+              placeholder="Prompt content"
+              .value=${this.newContent}
+              @input=${(e: any) => {
+                this.newContent = e.target.value;
+                this.requestUpdate(); // Force real-time updates
+              }}
+              required
+            ></textarea>
+          </div>
           <button type="submit">
             ${this.editingId ? "Update Prompt" : "Add Prompt"}
           </button>

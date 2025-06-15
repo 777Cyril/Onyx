@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { state } from "lit/decorators.js";
-import { getSnippets } from "../storage";
+import { getSnippets, addSnippet, updateSnippet, deleteSnippet, validateStorageSize, validateStorageUpdateSize, getStorageInfo } from "../storage";
 
 class OnyxOptions extends LitElement {
   static styles = css`
@@ -68,6 +68,54 @@ class OnyxOptions extends LitElement {
     .controls button:hover {
       color: #000;
     }
+
+    /* Storage info styles */
+    .storage-info {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .storage-info h3 {
+      margin: 0 0 0.75rem 0;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .storage-info .storage-bar {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      margin: 0.75rem 0;
+      overflow: hidden;
+    }
+
+    .storage-info .storage-fill {
+      height: 100%;
+      background: #666;
+      transition: all 0.3s ease;
+      border-radius: 3px;
+    }
+
+    .storage-info .storage-fill.warning {
+      background: #f59e0b;
+    }
+
+    .storage-info .storage-fill.danger {
+      background: #ef4444;
+    }
+
+    .storage-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #666;
+      font-size: 0.8rem;
+    }
   `;
 
   @state()
@@ -82,16 +130,32 @@ class OnyxOptions extends LitElement {
   @state()
   newContent = "";
 
+  @state()
+  errorMessage = "";
+
+  @state()
+  storageInfo: any = null;
+
   async firstUpdated() {
     this.snippets = await getSnippets();
+    await this.updateStorageInfo();
     this.requestUpdate();
   }
 
+  async updateStorageInfo() {
+    try {
+      this.storageInfo = await getStorageInfo();
+      this.requestUpdate();
+    } catch (error) {
+      console.error('Error updating storage info:', error);
+    }
+  }
+
   private async handleDeleteSnippet(id: string) {
-    const all = await getSnippets();
-    const updated = all.filter((s) => s.id !== id);
-    await chrome.storage.sync.set({ "onyx-snippets": updated });
-    this.snippets = updated;
+    // Delete using new storage method
+    await deleteSnippet(id);
+    this.snippets = await getSnippets();
+    await this.updateStorageInfo();
     this.requestUpdate();
   }
 
@@ -110,27 +174,68 @@ class OnyxOptions extends LitElement {
     const content = this.newContent.trim();
     if (!title || !content) return;
 
-    const all = await getSnippets();
+    this.errorMessage = "";
 
-    if (this.editingId) {
-      // Update existing snippet
-      const updated = all.map((s) =>
-        s.id === this.editingId ? { ...s, title, content } : s
-      );
-      await chrome.storage.sync.set({ "onyx-snippets": updated });
-      this.snippets = updated;
-      this.editingId = null;
-    } else {
-      // Add new snippet
-      const newSnippet = {
-        id: crypto.randomUUID(),
-        title,
-        content,
-        createdAt: Date.now(),
-      };
-      const updated = [...all, newSnippet];
-      await chrome.storage.sync.set({ "onyx-snippets": updated });
-      this.snippets = updated;
+    try {
+      if (this.editingId) {
+        // Update existing snippet
+        const updatedSnippet = {
+          id: this.editingId,
+          title,
+          content,
+          createdAt: Date.now(),
+        };
+
+        // Validate storage size for update
+        const validation = await validateStorageUpdateSize(updatedSnippet);
+        if (!validation.isValid) {
+          if (validation.projectedSize > validation.maxSize) {
+            const sizeDiff = validation.projectedSize - validation.maxSize;
+            this.errorMessage = `Snippet too large! Exceeds individual item limit by ${sizeDiff} bytes. Try shortening the content.`;
+          } else {
+            this.errorMessage = `Cannot update: would exceed maximum number of items (${validation.maxItems}).`;
+          }
+          this.requestUpdate();
+          return;
+        }
+
+        // Update using new storage method
+        await updateSnippet(updatedSnippet);
+        this.snippets = await getSnippets();
+        await this.updateStorageInfo();
+        this.editingId = null;
+      } else {
+        // Add new snippet
+        const newSnippet = {
+          id: crypto.randomUUID(),
+          title,
+          content,
+          createdAt: Date.now(),
+        };
+
+        // Validate storage size for new snippet
+        const validation = await validateStorageSize(newSnippet);
+        if (!validation.isValid) {
+          if (validation.projectedSize > validation.maxSize) {
+            const sizeDiff = validation.projectedSize - validation.maxSize;
+            this.errorMessage = `Snippet too large! Exceeds individual item limit by ${sizeDiff} bytes. Try shortening the content.`;
+          } else {
+            this.errorMessage = `Cannot add snippet: would exceed maximum number of items (${validation.maxItems}).`;
+          }
+          this.requestUpdate();
+          return;
+        }
+
+        // Add using new storage method
+        await addSnippet(newSnippet);
+        this.snippets = await getSnippets();
+        await this.updateStorageInfo();
+      }
+    } catch (error) {
+      console.error('Error saving snippet:', error);
+      this.errorMessage = 'Failed to save snippet. Please try again.';
+      this.requestUpdate();
+      return;
     }
 
     // Clear state variables
@@ -160,6 +265,30 @@ class OnyxOptions extends LitElement {
     return html`
       <h1>Onyx • Options</h1>
       <p>Manage your saved snippets below:</p>
+
+      <!-- Storage info -->
+      ${this.storageInfo ? html`
+        <div class="storage-info">
+          <h3>Storage Information</h3>
+          <div class="storage-stats">
+            <span>Items used</span>
+            <span>${this.storageInfo.itemCount}/${this.storageInfo.maxItems} items (${Math.round(this.storageInfo.percentUsed)}%)</span>
+          </div>
+          <div class="storage-bar">
+            <div class="storage-fill ${this.storageInfo.percentUsed > 85 ? 'danger' : this.storageInfo.percentUsed > 70 ? 'warning' : ''}"
+                 style="width: ${Math.min(this.storageInfo.percentUsed, 100)}%"></div>
+          </div>
+          <div style="color: #666; font-size: 0.75rem; margin-top: 0.5rem;">
+            With individual item storage, you can now store up to ${this.storageInfo.maxItems} prompts with virtually unlimited content per prompt.
+          </div>
+        </div>
+      ` : ''}
+
+      ${this.errorMessage ? html`
+        <div style="background: #fee; border: 1px solid #f00; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px; color: #d00;">
+          ${this.errorMessage}
+        </div>
+      ` : ''}
 
       <form @submit=${this.handleSaveSnippet}>
         <input

@@ -421,19 +421,40 @@ document.addEventListener('input', async (e) => {
         snippetModeState.searchQuery = searchQuery;
         snippetModeState.selectedIndex = 0;
         
-        // Get and filter snippets
-        chrome.storage.sync.get(null, (data) => {
-            const allSnippets = data['onyx-snippets'] || [];
-            snippetModeState.filteredSnippets = filterSnippets(allSnippets, searchQuery);
-            
-            // Update display
-            updatePicker(snippetModeState.filteredSnippets);
-            
-            // Add event listeners if not already added
-            if (!document.getElementById('onyx-picker')) {
-                setTimeout(() => {
-                    document.addEventListener('click', handleOutsideClick);
-                }, 0);
+        // Get and filter snippets using new storage architecture
+        chrome.storage.sync.get(null, async (data) => {
+            try {
+                // Get the snippet index
+                const snippetIndex = data['onyx-index'] || [];
+                const allSnippets = [];
+                
+                // Load each snippet individually
+                for (const snippetId of snippetIndex) {
+                    const snippetKey = `snippet-${snippetId}`;
+                    const snippet = data[snippetKey];
+                    if (snippet) {
+                        allSnippets.push(snippet);
+                    }
+                }
+                
+                // Sort by creation date (newest first)
+                allSnippets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                snippetModeState.filteredSnippets = filterSnippets(allSnippets, searchQuery);
+                
+                // Update display
+                updatePicker(snippetModeState.filteredSnippets);
+                
+                // Add event listeners if not already added
+                if (!document.getElementById('onyx-picker')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', handleOutsideClick);
+                    }, 0);
+                }
+            } catch (error) {
+                console.error('Error loading snippets in content script:', error);
+                snippetModeState.filteredSnippets = [];
+                updatePicker([]);
             }
         });
         
