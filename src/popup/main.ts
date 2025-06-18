@@ -5,10 +5,48 @@ import { getSnippets, addSnippet, updateSnippet, deleteSnippet, validateStorageS
 
 class OnyxPopup extends LitElement {
   static styles = css`
+    /* Coolors.co Palette - Green/Lavender/Gunmetal Theme */
     :host {
+      /* Brand Colors */
+      --brand-primary: #5A7D7C;  /* Hooker's green */
+      --brand-secondary: #232C33; /* Gunmetal */
+      
+      /* Background Colors */
+      --bg-primary: #232C33;     /* Gunmetal - main background */
+      --bg-secondary: #2a3439;   /* Slightly lighter gunmetal */
+      --bg-tertiary: #313b41;    /* Even lighter for hover states */
+      --bg-hover: #3a464d;       /* Hover state */
+      
+      /* Border Colors */
+      --border-primary: #4a5a61;   /* Muted border */
+      --border-secondary: #5A7D7C; /* Green accent border */
+      --border-hover: #6a8d8c;     /* Lighter green hover */
+      
+      /* Text Colors */
+      --text-primary: #DADFF7;     /* Lavender for main text */
+      --text-secondary: #B5B2C2;   /* French gray for secondary text */
+      --text-muted: #8a9299;       /* Muted text */
+      
+      /* Scrollbar Colors */
+      --scrollbar-track: transparent;
+      --scrollbar-thumb: #5A7D7C;   /* Green thumb */
+      --scrollbar-thumb-hover: #6a8d8c; /* Lighter green hover */
+      
+      /* Success/Error Colors */
+      --success-bg: rgba(90, 125, 124, 0.15);  /* Green tint */
+      --success-border: rgba(90, 125, 124, 0.3);
+      --error-bg: #3d2a2a;
+      --error-border: #d87171;
+      --error-text: #f5a5a5;
+      
+      /* Glass Effect Colors */
+      --glass-bg: rgba(218, 223, 247, 0.05);   /* Lavender tint */
+      --glass-border: rgba(218, 223, 247, 0.15);
+      --glass-shimmer: rgba(218, 223, 247, 0.3);
+      
       display: block;
-      background: #1a1a1a;
-      color: #e5e5e5;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       width: 400px;
       height: 450px;
@@ -22,21 +60,21 @@ class OnyxPopup extends LitElement {
       width: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: transparent;
+      background: var(--scrollbar-track);
     }
     ::-webkit-scrollbar-thumb {
-      background: #404040;
+      background: var(--scrollbar-thumb);
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      background: var(--scrollbar-thumb-hover);
     }
 
     /* Header */
     .header {
-      background: #2a2a2a;
+      background: var(--bg-secondary);
       padding: 1rem 1rem 0.75rem;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border-primary);
       position: sticky;
       top: 0;
       z-index: 10;
@@ -46,14 +84,14 @@ class OnyxPopup extends LitElement {
       margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
-      color: #FF0000;
+      color: var(--brand-primary);
       letter-spacing: -0.02em;
     }
 
     .tagline {
       margin: 0.125rem 0 0;
       font-size: 0.75rem;
-      color: #999;
+      color: var(--text-secondary);
       font-weight: 400;
     }
 
@@ -62,7 +100,7 @@ class OnyxPopup extends LitElement {
       padding: 1rem;
       overflow-y: auto;
       height: calc(100% - 80px);
-      background: #1a1a1a;
+      background: var(--bg-primary);
     }
 
     /* Search bar - now at the top */
@@ -72,9 +110,9 @@ class OnyxPopup extends LitElement {
 
     .search-input {
       width: 100%;
-      background: #2a2a2a;
-      border: 1px solid #333;
-      color: #e5e5e5;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
       padding: 0.5rem 0.75rem;
       font-size: 0.8125rem;
       border-radius: 6px;
@@ -84,18 +122,18 @@ class OnyxPopup extends LitElement {
     }
 
     .search-input:focus {
-      border-color: #000;
+      border-color: var(--brand-secondary);
       background: #222;
     }
 
     .search-input::placeholder {
-      color: #666;
+      color: var(--text-muted);
     }
 
     /* Form styling */
     form {
-      background: #2a2a2a;
-      border: 1px solid #333;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 1rem;
@@ -106,15 +144,15 @@ class OnyxPopup extends LitElement {
     }
 
     form:focus-within {
-      border-color: #404040;
+      border-color: var(--border-secondary);
     }
 
     input,
     textarea {
       width: 100%;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #e5e5e5;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
       padding: 0.5rem 0.75rem;
       font-size: 0.8125rem;
       border-radius: 6px;
@@ -128,18 +166,18 @@ class OnyxPopup extends LitElement {
 
     input:focus,
     textarea:focus {
-      border-color: #000;
+      border-color: var(--brand-secondary);
       background: #222;
     }
 
     input::placeholder,
     textarea::placeholder {
-      color: #666;
+      color: var(--text-muted);
     }
 
     /* Button styling */
     button[type="submit"] {
-      background: #000;
+      background: var(--brand-secondary);
       color: #fff;
       border: none;
       padding: 0.5rem 1rem;
@@ -178,14 +216,14 @@ class OnyxPopup extends LitElement {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #666;
+      color: var(--text-muted);
       font-weight: 600;
     }
 
     .snippet-count {
       font-size: 0.75rem;
-      color: #666;
-      background: #2a2a2a;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
     }
@@ -197,8 +235,8 @@ class OnyxPopup extends LitElement {
     }
 
     li {
-      background: #2a2a2a;
-      border: 1px solid #333;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
       border-radius: 6px;
       padding: 0.75rem;
       margin-bottom: 0.5rem;
@@ -208,8 +246,8 @@ class OnyxPopup extends LitElement {
     }
 
     li:hover {
-      border-color: #404040;
-      background: #2d2d2d;
+      border-color: var(--border-secondary);
+      background: var(--bg-tertiary);
     }
 
     .snippet-header {
@@ -221,7 +259,7 @@ class OnyxPopup extends LitElement {
 
     .snippet-title {
       font-weight: 500;
-      color: #fff;
+      color: var(--brand-primary);
       font-size: 0.875rem;
       margin: 0;
       flex: 1;
@@ -229,7 +267,7 @@ class OnyxPopup extends LitElement {
 
     .snippet-content {
       font-size: 0.75rem;
-      color: #999;
+      color: var(--text-secondary);
       line-height: 1.4;
       margin: 0;
       word-break: break-word;
@@ -245,11 +283,11 @@ class OnyxPopup extends LitElement {
       right: 0;
       width: 100%;
       height: 1.5rem;
-      background: linear-gradient(to bottom, transparent, #2a2a2a);
+      background: linear-gradient(to bottom, transparent, var(--bg-secondary));
     }
 
     li:hover .snippet-content::after {
-      background: linear-gradient(to bottom, transparent, #2d2d2d);
+      background: linear-gradient(to bottom, transparent, var(--bg-tertiary));
     }
 
     /* Action buttons */
@@ -267,7 +305,7 @@ class OnyxPopup extends LitElement {
     .action-btn {
       background: transparent;
       border: 1px solid transparent;
-      color: #666;
+      color: var(--text-muted);
       padding: 0.375rem;
       font-size: 0.875rem;
       border-radius: 6px;
@@ -281,15 +319,15 @@ class OnyxPopup extends LitElement {
     }
 
     .action-btn:hover {
-      color: #e5e5e5;
-      background: #333;
-      border-color: #404040;
+      color: var(--text-primary);
+      background: var(--border-primary);
+      border-color: var(--border-secondary);
     }
 
     .action-btn.edit:hover {
-      color: #000;
-      border-color: #000;
-      background: #e5e5e5;
+      color: var(--brand-secondary);
+      border-color: var(--brand-secondary);
+      background: var(--text-primary);
     }
 
     .action-btn.delete:hover {
@@ -301,7 +339,7 @@ class OnyxPopup extends LitElement {
     .empty-state {
       text-align: center;
       padding: 1.5rem 1rem;
-      color: #666;
+      color: var(--text-muted);
     }
 
     .empty-text {
@@ -311,8 +349,8 @@ class OnyxPopup extends LitElement {
 
     /* Edit mode indicator */
     form.editing {
-      border-color: #000;
-      background: #1a1a1a;
+      border-color: var(--brand-secondary);
+      background: var(--bg-primary);
     }
 
 
@@ -334,15 +372,15 @@ class OnyxPopup extends LitElement {
     }
 
     .message.error {
-      background: #2d1b1b;
-      border: 1px solid #ef4444;
-      color: #fca5a5;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
     }
 
     .message.success {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #e5e5e5;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--text-primary);
       font-weight: 500;
       font-size: 0.75rem;
       padding: 0.5rem 0.75rem;
@@ -359,7 +397,7 @@ class OnyxPopup extends LitElement {
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      background: linear-gradient(90deg, transparent, var(--glass-shimmer), transparent);
       animation: shimmer 1.5s ease-in-out;
     }
 
@@ -386,12 +424,12 @@ class OnyxPopup extends LitElement {
     /* Space restriction warning */
     .space-warning {
       font-size: 0.6875rem;
-      color: #ef4444;
+      color: var(--error-border);
       margin-top: 0.25rem;
       line-height: 1.3;
       padding: 0.25rem 0.5rem;
-      background: #2d1b1b;
-      border: 1px solid #ef4444;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
       border-radius: 4px;
       animation: slideInWarning 0.2s ease-out;
     }
@@ -410,18 +448,18 @@ class OnyxPopup extends LitElement {
 
     /* Subtle trigger hint in tagline */
     .tagline .trigger-hint {
-      color: #666;
+      color: var(--text-muted);
       font-size: 0.6875rem;
       margin-left: 0.5rem;
     }
 
     .tagline .trigger-hint code {
-      background: #333;
+      background: var(--border-primary);
       padding: 0.125rem 0.25rem;
       border-radius: 3px;
       font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
       font-size: 0.6rem;
-      color: #ff0000;
+      color: var(--brand-primary);
     }
 
 
@@ -774,14 +812,14 @@ class OnyxPopup extends LitElement {
               required
             ></textarea>
           </div>
-          <button type="submit" style="color: #FF0000;">
+          <button type="submit" style="color: var(--brand-primary);">
             ${this.editingId ? "Update Prompt" : "Add Prompt"}
           </button>
           ${this.editingId ? html`
             <button 
               type="button" 
               @click=${this.handleCancelEdit}
-              style="background: transparent; color: #666; margin-top: 0.5rem; border: 1px solid #333;"
+              style="background: transparent; color: var(--text-muted); margin-top: 0.5rem; border: 1px solid var(--border-primary);"
             >
               Cancel
             </button>

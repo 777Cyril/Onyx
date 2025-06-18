@@ -90,8 +90,8 @@ function getPicker(): HTMLElement {
     picker.id = "onyx-picker";
     Object.assign(picker.style, {
         position: "absolute",
-        background: "#2a2a2a",
-        border: "1px solid #404040",
+        background: "var(--onyx-bg-secondary)",
+        border: "1px solid var(--onyx-border-secondary)",
         borderRadius: "8px",
         padding: "0",
         fontSize: "14px",
@@ -107,33 +107,50 @@ function getPicker(): HTMLElement {
     // Custom scrollbar for dark mode and magical animations
     const style = document.createElement('style');
     style.textContent = `
+        /* Onyx Coolors.co Palette - Content Script */
+        :root {
+            --onyx-brand-primary: #5A7D7C;    /* Hooker's green */
+            --onyx-brand-secondary: #232C33;  /* Gunmetal */
+            --onyx-bg-primary: #232C33;       /* Gunmetal */
+            --onyx-bg-secondary: #2a3439;     /* Lighter gunmetal */
+            --onyx-bg-tertiary: #313b41;      /* Even lighter */
+            --onyx-bg-hover: #3a464d;         /* Hover state */
+            --onyx-border-primary: #4a5a61;   /* Muted border */
+            --onyx-border-secondary: #5A7D7C; /* Green accent */
+            --onyx-text-primary: #DADFF7;     /* Lavender */
+            --onyx-text-secondary: #B5B2C2;   /* French gray */
+            --onyx-text-muted: #8a9299;       /* Muted */
+            --onyx-scrollbar-thumb: #5A7D7C;  /* Green thumb */
+            --onyx-scrollbar-thumb-hover: #6a8d8c; /* Lighter green */
+        }
+        
         #onyx-picker::-webkit-scrollbar {
             width: 8px;
         }
         #onyx-picker::-webkit-scrollbar-track {
-            background: #2a2a2a;
+            background: var(--onyx-bg-secondary);
         }
         #onyx-picker::-webkit-scrollbar-thumb {
-            background: #555;
+            background: var(--onyx-scrollbar-thumb);
             border-radius: 4px;
         }
         #onyx-picker::-webkit-scrollbar-thumb:hover {
-            background: #666;
+            background: var(--onyx-scrollbar-thumb-hover);
         }
         
         /* Border Trace Effect */
         @keyframes borderTrace {
             0% {
-                box-shadow: inset 2px 0 0 #ff0000, inset 0 0 0 transparent;
+                box-shadow: inset 2px 0 0 var(--onyx-brand-primary), inset 0 0 0 transparent;
             }
             25% {
-                box-shadow: inset 2px 0 0 #ff0000, inset 0 2px 0 #ff0000;
+                box-shadow: inset 2px 0 0 var(--onyx-brand-primary), inset 0 2px 0 var(--onyx-brand-primary);
             }
             50% {
-                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 #ff0000, inset -2px 0 0 #ff0000;
+                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 var(--onyx-brand-primary), inset -2px 0 0 var(--onyx-brand-primary);
             }
             75% {
-                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 #ff0000, inset -2px 0 0 #ff0000;
+                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 var(--onyx-brand-primary), inset -2px 0 0 var(--onyx-brand-primary);
             }
             100% {
                 box-shadow: inset 0 0 0 transparent;
@@ -146,8 +163,8 @@ function getPicker(): HTMLElement {
         
         
         .onyx-exact-match {
-            background: #1a3a1a !important;
-            border-left: 3px solid #ff0000 !important;
+            background: rgba(90, 125, 124, 0.15) !important;
+            border-left: 3px solid var(--onyx-brand-primary) !important;
         }
         
         .onyx-ready-indicator {
@@ -161,7 +178,7 @@ function getPicker(): HTMLElement {
             top: 50%;
             transform: translateY(-50%);
             font-size: 11px;
-            color: #ff0000;
+            color: var(--onyx-brand-primary);
             opacity: 0.8;
         }
     `;
@@ -246,7 +263,7 @@ function highlightMatch(text: string, query: string): string {
     if (!query) return text;
     
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<span style="color: #ff0000; font-weight: 500;">$1</span>');
+    return text.replace(regex, '<span style="color: var(--onyx-brand-primary); font-weight: 500;">$1</span>');
 }
 
 // Calculate optimal position for picker
@@ -306,7 +323,7 @@ function updatePicker(snippets: any[]) {
         noResults.textContent = 'No matching prompts';
         Object.assign(noResults.style, {
             padding: '12px 16px',
-            color: '#999',
+            color: 'var(--onyx-text-secondary)',
             fontStyle: 'italic',
             textAlign: 'center'
         });
@@ -338,9 +355,9 @@ function updatePicker(snippets: any[]) {
         Object.assign(item.style, {
             padding: '10px 16px',
             cursor: 'pointer',
-            backgroundColor: index === snippetModeState.selectedIndex ? '#404040' : 'transparent',
-            color: '#e5e5e5',
-            borderBottom: index < snippets.length - 1 ? '1px solid #333' : 'none',
+            backgroundColor: index === snippetModeState.selectedIndex ? 'var(--onyx-bg-hover)' : 'transparent',
+            color: 'var(--onyx-text-primary)',
+            borderBottom: index < snippets.length - 1 ? '1px solid var(--onyx-border-primary)' : 'none',
             transition: 'background-color 0.15s ease, border-color 0.15s ease',
             borderRadius: index === 0 ? '8px 8px 0 0' : (index === snippets.length - 1 ? '0 0 8px 8px' : '0')
         });
@@ -348,7 +365,7 @@ function updatePicker(snippets: any[]) {
         // Hover effects
         item.addEventListener('mouseenter', () => {
             if (!isExactMatch) {
-                item.style.backgroundColor = '#404040';
+                item.style.backgroundColor = 'var(--onyx-bg-hover)';
             }
             // Update selected index on hover
             snippetModeState.selectedIndex = index;
@@ -382,7 +399,7 @@ function updateSelectionVisuals() {
     const items = picker.querySelectorAll('[data-snippet-index]');
     items.forEach((item, i) => {
         const el = item as HTMLElement;
-        el.style.backgroundColor = i === snippetModeState.selectedIndex ? '#404040' : 'transparent';
+        el.style.backgroundColor = i === snippetModeState.selectedIndex ? 'var(--onyx-bg-hover)' : 'transparent';
     });
 }
 

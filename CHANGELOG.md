@@ -5,28 +5,6 @@ All notable changes to the Onyx extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2025-06-15
-
-### Fixed
-- **Critical prompt selector bug**: Fixed broken "x/" trigger functionality that was preventing the prompt picker from appearing after storage architecture refactoring
-- **Module import issues**: Resolved browser extension compatibility issues with external module imports that were causing storage functions to fail
-
-### Improved
-- **Reduced bundle size**: Removed legacy visual effects (glow pulse and materialization animations) that were no longer in use, reducing CSS bundle size by ~60 lines
-- **Cleaner codebase**: Centralized storage utility functions to eliminate code duplication between background and content scripts
-- **Better error handling**: Enhanced storage loading with proper async/await patterns and fallback mechanisms
-- **Performance optimization**: Streamlined storage operations by removing unused animation effects and consolidating duplicate logic
-
-### Technical Details
-- Moved storage utility functions directly into content script to resolve module import issues in browser extension context
-- Eliminated external module dependencies that were causing runtime failures
-- Consolidated storage loading, filtering, and exact match logic into content script for better reliability
-- Removed unused CSS animations (glow pulse, materialization) to reduce bundle size
-- Enhanced storage functions with proper TypeScript typing and error handling
-- Improved build process by removing unnecessary module compilation
-
----
-
 ## [1.1.0] - 2025-06-15
 
 ### Added

@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "webstore:patch": "./scripts/prepare-webstore.sh patch",
+    "webstore:minor": "./scripts/prepare-webstore.sh minor",
+    "webstore:major": "./scripts/prepare-webstore.sh major"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.324",

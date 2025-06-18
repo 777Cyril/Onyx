@@ -1,4 +1,4 @@
-var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configurable:!0,writable:!0,value:e}):d[a]=e;var s=(d,a,e)=>f(d,typeof a!="symbol"?a+"":a,e);import{i as b,a as w,g as h,v as y,u as x,b as S,c as v,d as k,x as p,r as l}from"./assets/storage-Do-FYhGn.js";var C=Object.defineProperty,c=(d,a,e,t)=>{for(var r=void 0,i=d.length-1,o;i>=0;i--)(o=d[i])&&(r=o(a,e,r)||r);return r&&C(a,e,r),r};class n extends b{constructor(){super(...arguments);s(this,"snippets",[]);s(this,"newTitle","");s(this,"newContent","");s(this,"editingId",null);s(this,"searchQuery","");s(this,"filteredSnippets",[]);s(this,"errorMessage","");s(this,"showSuccess",!1);s(this,"originalScrollPosition",0);s(this,"showSpaceWarning",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const r=(t.title||"").toLowerCase().includes(e),i=(t.content||"").toLowerCase().includes(e);return r||i})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const t=e.target;this.newTitle=t.value,t.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var r,i;const e=(r=this.shadowRoot)==null?void 0:r.querySelector('form input[type="text"]'),t=(i=this.shadowRoot)==null?void 0:i.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),r=this.newContent.trim();if(!(!t||!r)){if(this.clearMessages(),t.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const i={id:this.editingId,title:t,content:r,createdAt:Date.now()},o=await y(i);if(!o.isValid){if(o.projectedSize>o.maxSize){const m=o.projectedSize-o.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${o.maxItems}).`);return}await x(i),this.snippets=await h()}else{const i={id:crypto.randomUUID(),title:t,content:r,createdAt:Date.now()},o=await S(i);if(!o.isValid){if(o.projectedSize>o.maxSize){const m=o.projectedSize-o.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${o.maxItems}).`);return}await v(i),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(i){console.error("Error saving snippet:",i),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(i=>i.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(i){console.error("Error deleting snippet:",i)}}handleEditSnippet(e){var i;const t=this.snippets.find(o=>o.id===e);if(!t)return;const r=(i=this.shadowRoot)==null?void 0:i.querySelector(".content");r&&(this.originalScrollPosition=r.scrollTop),this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
+var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configurable:!0,writable:!0,value:e}):c[n]=e;var s=(c,n,e)=>b(c,typeof n!="symbol"?n+"":n,e);import{i as f,a as y,g as h,v,u as x,b as w,c as S,d as k,x as p,r as d}from"./assets/storage-Do-FYhGn.js";var C=Object.defineProperty,l=(c,n,e,t)=>{for(var o=void 0,r=c.length-1,i;r>=0;r--)(i=c[r])&&(o=i(n,e,o)||o);return o&&C(n,e,o),o};class a extends f{constructor(){super(...arguments);s(this,"snippets",[]);s(this,"newTitle","");s(this,"newContent","");s(this,"editingId",null);s(this,"searchQuery","");s(this,"filteredSnippets",[]);s(this,"errorMessage","");s(this,"showSuccess",!1);s(this,"originalScrollPosition",0);s(this,"showSpaceWarning",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const o=(t.title||"").toLowerCase().includes(e),r=(t.content||"").toLowerCase().includes(e);return o||r})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const t=e.target;this.newTitle=t.value,t.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var o,r;const e=(o=this.shadowRoot)==null?void 0:o.querySelector('form input[type="text"]'),t=(r=this.shadowRoot)==null?void 0:r.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),o=this.newContent.trim();if(!(!t||!o)){if(this.clearMessages(),t.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const r={id:this.editingId,title:t,content:o,createdAt:Date.now()},i=await v(r);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${i.maxItems}).`);return}await x(r),this.snippets=await h()}else{const r={id:crypto.randomUUID(),title:t,content:o,createdAt:Date.now()},i=await w(r);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${i.maxItems}).`);return}await S(r),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(r){console.error("Error saving snippet:",r),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(r=>r.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(r){console.error("Error deleting snippet:",r)}}handleEditSnippet(e){var r;const t=this.snippets.find(i=>i.id===e);if(!t)return;const o=(r=this.shadowRoot)==null?void 0:r.querySelector(".content");o&&(this.originalScrollPosition=o.scrollTop),this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
       <div class="header">
         <h1>Onyx</h1>
         <p class="tagline">
@@ -55,14 +55,14 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
               required
             ></textarea>
           </div>
-          <button type="submit" style="color: #FF0000;">
+          <button type="submit" style="color: var(--brand-primary);">
             ${this.editingId?"Update Prompt":"Add Prompt"}
           </button>
           ${this.editingId?p`
             <button 
               type="button" 
               @click=${this.handleCancelEdit}
-              style="background: transparent; color: #666; margin-top: 0.5rem; border: 1px solid #333;"
+              style="background: transparent; color: var(--text-muted); margin-top: 0.5rem; border: 1px solid var(--border-primary);"
             >
               Cancel
             </button>
@@ -121,11 +121,49 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
           `}
         </div>
       </div>
-    `}}s(n,"styles",w`
+    `}}s(a,"styles",y`
+    /* Coolors.co Palette - Green/Lavender/Gunmetal Theme */
     :host {
+      /* Brand Colors */
+      --brand-primary: #5A7D7C;  /* Hooker's green */
+      --brand-secondary: #232C33; /* Gunmetal */
+      
+      /* Background Colors */
+      --bg-primary: #232C33;     /* Gunmetal - main background */
+      --bg-secondary: #2a3439;   /* Slightly lighter gunmetal */
+      --bg-tertiary: #313b41;    /* Even lighter for hover states */
+      --bg-hover: #3a464d;       /* Hover state */
+      
+      /* Border Colors */
+      --border-primary: #4a5a61;   /* Muted border */
+      --border-secondary: #5A7D7C; /* Green accent border */
+      --border-hover: #6a8d8c;     /* Lighter green hover */
+      
+      /* Text Colors */
+      --text-primary: #DADFF7;     /* Lavender for main text */
+      --text-secondary: #B5B2C2;   /* French gray for secondary text */
+      --text-muted: #8a9299;       /* Muted text */
+      
+      /* Scrollbar Colors */
+      --scrollbar-track: transparent;
+      --scrollbar-thumb: #5A7D7C;   /* Green thumb */
+      --scrollbar-thumb-hover: #6a8d8c; /* Lighter green hover */
+      
+      /* Success/Error Colors */
+      --success-bg: rgba(90, 125, 124, 0.15);  /* Green tint */
+      --success-border: rgba(90, 125, 124, 0.3);
+      --error-bg: #3d2a2a;
+      --error-border: #d87171;
+      --error-text: #f5a5a5;
+      
+      /* Glass Effect Colors */
+      --glass-bg: rgba(218, 223, 247, 0.05);   /* Lavender tint */
+      --glass-border: rgba(218, 223, 247, 0.15);
+      --glass-shimmer: rgba(218, 223, 247, 0.3);
+      
       display: block;
-      background: #1a1a1a;
-      color: #e5e5e5;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       width: 400px;
       height: 450px;
@@ -139,21 +177,21 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       width: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: transparent;
+      background: var(--scrollbar-track);
     }
     ::-webkit-scrollbar-thumb {
-      background: #404040;
+      background: var(--scrollbar-thumb);
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #555;
+      background: var(--scrollbar-thumb-hover);
     }
 
     /* Header */
     .header {
-      background: #2a2a2a;
+      background: var(--bg-secondary);
       padding: 1rem 1rem 0.75rem;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border-primary);
       position: sticky;
       top: 0;
       z-index: 10;
@@ -163,14 +201,14 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       margin: 0;
       font-size: 1.25rem;
       font-weight: 600;
-      color: #FF0000;
+      color: var(--brand-primary);
       letter-spacing: -0.02em;
     }
 
     .tagline {
       margin: 0.125rem 0 0;
       font-size: 0.75rem;
-      color: #999;
+      color: var(--text-secondary);
       font-weight: 400;
     }
 
@@ -179,7 +217,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       padding: 1rem;
       overflow-y: auto;
       height: calc(100% - 80px);
-      background: #1a1a1a;
+      background: var(--bg-primary);
     }
 
     /* Search bar - now at the top */
@@ -189,9 +227,9 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     .search-input {
       width: 100%;
-      background: #2a2a2a;
-      border: 1px solid #333;
-      color: #e5e5e5;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
       padding: 0.5rem 0.75rem;
       font-size: 0.8125rem;
       border-radius: 6px;
@@ -201,18 +239,18 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     .search-input:focus {
-      border-color: #000;
+      border-color: var(--brand-secondary);
       background: #222;
     }
 
     .search-input::placeholder {
-      color: #666;
+      color: var(--text-muted);
     }
 
     /* Form styling */
     form {
-      background: #2a2a2a;
-      border: 1px solid #333;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
       border-radius: 8px;
       padding: 1rem;
       margin-bottom: 1rem;
@@ -223,15 +261,15 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     form:focus-within {
-      border-color: #404040;
+      border-color: var(--border-secondary);
     }
 
     input,
     textarea {
       width: 100%;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #e5e5e5;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
       padding: 0.5rem 0.75rem;
       font-size: 0.8125rem;
       border-radius: 6px;
@@ -245,18 +283,18 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     input:focus,
     textarea:focus {
-      border-color: #000;
+      border-color: var(--brand-secondary);
       background: #222;
     }
 
     input::placeholder,
     textarea::placeholder {
-      color: #666;
+      color: var(--text-muted);
     }
 
     /* Button styling */
     button[type="submit"] {
-      background: #000;
+      background: var(--brand-secondary);
       color: #fff;
       border: none;
       padding: 0.5rem 1rem;
@@ -295,14 +333,14 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #666;
+      color: var(--text-muted);
       font-weight: 600;
     }
 
     .snippet-count {
       font-size: 0.75rem;
-      color: #666;
-      background: #2a2a2a;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
     }
@@ -314,8 +352,8 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     li {
-      background: #2a2a2a;
-      border: 1px solid #333;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
       border-radius: 6px;
       padding: 0.75rem;
       margin-bottom: 0.5rem;
@@ -325,8 +363,8 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     li:hover {
-      border-color: #404040;
-      background: #2d2d2d;
+      border-color: var(--border-secondary);
+      background: var(--bg-tertiary);
     }
 
     .snippet-header {
@@ -338,7 +376,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     .snippet-title {
       font-weight: 500;
-      color: #FF0000;
+      color: var(--brand-primary);
       font-size: 0.875rem;
       margin: 0;
       flex: 1;
@@ -346,7 +384,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     .snippet-content {
       font-size: 0.75rem;
-      color: #999;
+      color: var(--text-secondary);
       line-height: 1.4;
       margin: 0;
       word-break: break-word;
@@ -362,11 +400,11 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       right: 0;
       width: 100%;
       height: 1.5rem;
-      background: linear-gradient(to bottom, transparent, #2a2a2a);
+      background: linear-gradient(to bottom, transparent, var(--bg-secondary));
     }
 
     li:hover .snippet-content::after {
-      background: linear-gradient(to bottom, transparent, #2d2d2d);
+      background: linear-gradient(to bottom, transparent, var(--bg-tertiary));
     }
 
     /* Action buttons */
@@ -384,7 +422,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     .action-btn {
       background: transparent;
       border: 1px solid transparent;
-      color: #666;
+      color: var(--text-muted);
       padding: 0.375rem;
       font-size: 0.875rem;
       border-radius: 6px;
@@ -398,15 +436,15 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     .action-btn:hover {
-      color: #e5e5e5;
-      background: #333;
-      border-color: #404040;
+      color: var(--text-primary);
+      background: var(--border-primary);
+      border-color: var(--border-secondary);
     }
 
     .action-btn.edit:hover {
-      color: #000;
-      border-color: #000;
-      background: #e5e5e5;
+      color: var(--brand-secondary);
+      border-color: var(--brand-secondary);
+      background: var(--text-primary);
     }
 
     .action-btn.delete:hover {
@@ -418,7 +456,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     .empty-state {
       text-align: center;
       padding: 1.5rem 1rem;
-      color: #666;
+      color: var(--text-muted);
     }
 
     .empty-text {
@@ -428,8 +466,8 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     /* Edit mode indicator */
     form.editing {
-      border-color: #000;
-      background: #1a1a1a;
+      border-color: var(--brand-secondary);
+      background: var(--bg-primary);
     }
 
 
@@ -451,15 +489,15 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     }
 
     .message.error {
-      background: #2d1b1b;
-      border: 1px solid #ef4444;
-      color: #fca5a5;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
     }
 
     .message.success {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #e5e5e5;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--text-primary);
       font-weight: 500;
       font-size: 0.75rem;
       padding: 0.5rem 0.75rem;
@@ -476,7 +514,7 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      background: linear-gradient(90deg, transparent, var(--glass-shimmer), transparent);
       animation: shimmer 1.5s ease-in-out;
     }
 
@@ -503,12 +541,12 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
     /* Space restriction warning */
     .space-warning {
       font-size: 0.6875rem;
-      color: #ef4444;
+      color: var(--error-border);
       margin-top: 0.25rem;
       line-height: 1.3;
       padding: 0.25rem 0.5rem;
-      background: #2d1b1b;
-      border: 1px solid #ef4444;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
       border-radius: 4px;
       animation: slideInWarning 0.2s ease-out;
     }
@@ -527,19 +565,19 @@ var g=Object.defineProperty;var f=(d,a,e)=>a in d?g(d,a,{enumerable:!0,configura
 
     /* Subtle trigger hint in tagline */
     .tagline .trigger-hint {
-      color: #666;
+      color: var(--text-muted);
       font-size: 0.6875rem;
       margin-left: 0.5rem;
     }
 
     .tagline .trigger-hint code {
-      background: #333;
+      background: var(--border-primary);
       padding: 0.125rem 0.25rem;
       border-radius: 3px;
       font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
       font-size: 0.6rem;
-      color: #ff0000;
+      color: var(--brand-primary);
     }
 
 
-  `);c([l()],n.prototype,"snippets");c([l()],n.prototype,"newTitle");c([l()],n.prototype,"newContent");c([l()],n.prototype,"editingId");c([l()],n.prototype,"searchQuery");c([l()],n.prototype,"filteredSnippets");c([l()],n.prototype,"errorMessage");c([l()],n.prototype,"showSuccess");c([l()],n.prototype,"originalScrollPosition");c([l()],n.prototype,"showSpaceWarning");customElements.define("onyx-popup",n);const u=document.getElementById("app");u&&u.appendChild(document.createElement("onyx-popup"));
+  `);l([d()],a.prototype,"snippets");l([d()],a.prototype,"newTitle");l([d()],a.prototype,"newContent");l([d()],a.prototype,"editingId");l([d()],a.prototype,"searchQuery");l([d()],a.prototype,"filteredSnippets");l([d()],a.prototype,"errorMessage");l([d()],a.prototype,"showSuccess");l([d()],a.prototype,"originalScrollPosition");l([d()],a.prototype,"showSpaceWarning");customElements.define("onyx-popup",a);const u=document.getElementById("app");u&&u.appendChild(document.createElement("onyx-popup"));
