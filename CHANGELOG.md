@@ -5,6 +5,31 @@ All notable changes to the Onyx extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-06-18
+
+### Added
+- **Complete theme system**: Implemented centralized theme management with light/dark mode toggle for consistent user experience across all extension components
+- **Apple-style theme toggle**: Added minimalistic theme toggle button in popup header with "THEME" label for intuitive theme switching
+- **Universal magic animation**: Extended red border trace animation to all prompt selection methods (Enter, Tab, Shift+Tab, and mouse click) for consistent visual feedback
+- **Dynamic theme-aware content script**: Content script now dynamically adapts styles based on selected theme with real-time theme change listening
+
+### Improved
+- **Enhanced dark mode**: Refined dark mode colors to match original design with better contrast and readability
+- **Smoother theme transitions**: Added smooth 0.3s transitions for all theme changes throughout the interface
+- **Consistent visual feedback**: All prompt selection methods now provide the same satisfying red magic animation experience
+- **Better color contrast**: Improved text visibility in dark mode with optimized gray tones
+
+### Technical Details
+- Created centralized theme management system in `src/utils/theme.ts` with comprehensive CSS variable definitions
+- Implemented theme state management with Chrome storage sync for persistence across sessions
+- Added theme change listeners for real-time updates across all extension components
+- Enhanced content script with dynamic theme application and storage change detection
+- Updated all prompt selection handlers to consistently trigger border trace animation
+- Optimized theme variable application with proper CSS custom property management
+- Added smooth CSS transitions for all theme-aware elements while preserving interactive element responsiveness
+
+---
+
 ## [1.1.0] - 2025-06-15
 
 ### Added
