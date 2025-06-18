@@ -567,7 +567,7 @@ class OnyxPopup extends LitElement {
   private showSpaceWarning = false;
 
   @state()
-  private currentTheme = 'light';
+  private currentTheme = 'dark';
 
 
   async connectedCallback() {
@@ -594,9 +594,9 @@ class OnyxPopup extends LitElement {
       this.requestUpdate();
     } catch (error) {
       console.error('Error initializing theme:', error);
-      // Fallback to light theme
-      this.currentTheme = 'light';
-      applyThemeVariables(this, 'light');
+      // Fallback to dark theme
+      this.currentTheme = 'dark';
+      applyThemeVariables(this, 'dark');
     }
   }
 

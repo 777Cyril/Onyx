@@ -105,7 +105,7 @@ export const THEMES: Record<string, Theme> = {
 };
 
 // Default theme
-export const DEFAULT_THEME = 'light';
+export const DEFAULT_THEME = 'dark';
 
 /**
  * Get the current theme preference from storage

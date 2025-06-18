@@ -44,10 +44,10 @@ interface Snippet {
 async function getCurrentTheme(): Promise<string> {
     try {
         const result = await chrome.storage.sync.get('onyx-theme');
-        return result['onyx-theme'] || 'light';
+        return result['onyx-theme'] || 'dark';
     } catch (error) {
         console.error('Error getting theme in content script:', error);
-        return 'light';
+        return 'dark';
     }
 }
 
@@ -196,8 +196,8 @@ async function initializeContentScriptTheme(styleElement: HTMLStyleElement): Pro
         });
     } catch (error) {
         console.error('Error initializing content script theme:', error);
-        // Fallback to light theme
-        updateContentScriptTheme(styleElement, 'light');
+        // Fallback to dark theme
+        updateContentScriptTheme(styleElement, 'dark');
     }
 }
 
