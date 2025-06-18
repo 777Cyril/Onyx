@@ -1,9 +1,204 @@
+// Theme definitions for content script
+const THEME_COLORS = {
+    light: {
+        brandPrimary: '#e85a4f',
+        brandSecondary: '#495057',
+        bgPrimary: '#ffffff',
+        bgSecondary: '#f8f9fa',
+        bgTertiary: '#e9ecef',
+        bgHover: '#dee2e6',
+        borderPrimary: '#dee2e6',
+        borderSecondary: '#e85a4f',
+        textPrimary: '#212529',
+        textSecondary: '#6c757d',
+        textMuted: '#adb5bd',
+        scrollbarThumb: '#e85a4f',
+        scrollbarThumbHover: '#dc3545'
+    },
+    dark: {
+        brandPrimary: '#ff0000',
+        brandSecondary: '#000000',
+        bgPrimary: '#121212',
+        bgSecondary: '#2d2d2d',
+        bgTertiary: '#1a1a1a',
+        bgHover: '#3a3a3a',
+        borderPrimary: '#444444',
+        borderSecondary: '#ff0000',
+        textPrimary: '#ffffff',
+        textSecondary: '#cccccc',
+        textMuted: '#888888',
+        scrollbarThumb: '#666666',
+        scrollbarThumbHover: '#777777'
+    }
+};
+
 // Snippet interface
 interface Snippet {
     id: string;
     title: string;
     content: string;
     createdAt: number;
+}
+
+// Get current theme from storage
+async function getCurrentTheme(): Promise<string> {
+    try {
+        const result = await chrome.storage.sync.get('onyx-theme');
+        return result['onyx-theme'] || 'light';
+    } catch (error) {
+        console.error('Error getting theme in content script:', error);
+        return 'light';
+    }
+}
+
+// Update content script theme styles
+function updateContentScriptTheme(styleElement: HTMLStyleElement, themeName: string): void {
+    const colors = THEME_COLORS[themeName as keyof typeof THEME_COLORS] || THEME_COLORS.light;
+    
+    styleElement.textContent = `
+        /* Onyx ${themeName === 'dark' ? 'Dark' : 'Light'} Theme - Content Script */
+        :root {
+            --onyx-brand-primary: ${colors.brandPrimary};
+            --onyx-brand-secondary: ${colors.brandSecondary};
+            --onyx-bg-primary: ${colors.bgPrimary};
+            --onyx-bg-secondary: ${colors.bgSecondary};
+            --onyx-bg-tertiary: ${colors.bgTertiary};
+            --onyx-bg-hover: ${colors.bgHover};
+            --onyx-border-primary: ${colors.borderPrimary};
+            --onyx-border-secondary: ${colors.borderSecondary};
+            --onyx-text-primary: ${colors.textPrimary};
+            --onyx-text-secondary: ${colors.textSecondary};
+            --onyx-text-muted: ${colors.textMuted};
+            --onyx-scrollbar-thumb: ${colors.scrollbarThumb};
+            --onyx-scrollbar-thumb-hover: ${colors.scrollbarThumbHover};
+        }
+        
+        #onyx-picker::-webkit-scrollbar {
+            width: 8px;
+        }
+        #onyx-picker::-webkit-scrollbar-track {
+            background: var(--onyx-bg-secondary);
+        }
+        #onyx-picker::-webkit-scrollbar-thumb {
+            background: var(--onyx-scrollbar-thumb);
+            border-radius: 4px;
+        }
+        #onyx-picker::-webkit-scrollbar-thumb:hover {
+            background: var(--onyx-scrollbar-thumb-hover);
+        }
+        
+        /* Border Trace Effect - Dynamic theme colors */
+        @keyframes borderTrace {
+            0% {
+                box-shadow: inset 2px 0 0 ${colors.brandPrimary}, inset 0 0 0 transparent;
+            }
+            25% {
+                box-shadow: inset 2px 0 0 ${colors.brandPrimary}, inset 0 2px 0 ${colors.brandPrimary};
+            }
+            50% {
+                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 ${colors.brandPrimary}, inset -2px 0 0 ${colors.brandPrimary};
+            }
+            75% {
+                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 ${colors.brandPrimary}, inset -2px 0 0 ${colors.brandPrimary};
+            }
+            100% {
+                box-shadow: inset 0 0 0 transparent;
+            }
+        }
+        
+        .onyx-border-trace-effect {
+            animation: borderTrace 400ms ease-in-out !important;
+        }
+        
+        .onyx-ready-indicator {
+            position: relative;
+        }
+        
+        .onyx-ready-indicator::after {
+            content: "✨ Ready to inject";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--onyx-brand-primary);
+            opacity: 0.8;
+            animation: magicPulse 2s ease-in-out infinite;
+        }
+        
+        /* Magic Pulse Animation */
+        @keyframes magicPulse {
+            0%, 100% {
+                opacity: 0.8;
+                text-shadow: 0 0 3px var(--onyx-brand-primary);
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 6px var(--onyx-brand-primary), 0 0 12px var(--onyx-brand-primary);
+            }
+        }
+        
+        /* Enhanced Exact Match Styling */
+        .onyx-exact-match {
+            background: rgba(${themeName === 'dark' ? '255, 0, 0' : '232, 90, 79'}, 0.1) !important;
+            border-left: 3px solid var(--onyx-brand-primary) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .onyx-exact-match::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(${themeName === 'dark' ? '255, 0, 0' : '232, 90, 79'}, 0.2),
+                rgba(${themeName === 'dark' ? '255, 255, 255' : '255, 255, 255'}, 0.3),
+                rgba(${themeName === 'dark' ? '255, 0, 0' : '232, 90, 79'}, 0.2),
+                transparent
+            );
+            animation: magicSweep 3s ease-in-out infinite;
+        }
+        
+        @keyframes magicSweep {
+            0% {
+                left: -100%;
+            }
+            50% {
+                left: 100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+    `;
+}
+
+// Initialize content script theme and listen for changes
+async function initializeContentScriptTheme(styleElement: HTMLStyleElement): Promise<void> {
+    try {
+        // Get current theme from storage
+        const currentTheme = await getCurrentTheme();
+        updateContentScriptTheme(styleElement, currentTheme);
+        
+        // Listen for theme changes
+        chrome.storage.onChanged.addListener((changes, areaName) => {
+            if (areaName === 'sync' && changes['onyx-theme']) {
+                const newTheme = changes['onyx-theme'].newValue;
+                if (newTheme) {
+                    updateContentScriptTheme(styleElement, newTheme);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing content script theme:', error);
+        // Fallback to light theme
+        updateContentScriptTheme(styleElement, 'light');
+    }
 }
 
 // Storage utility functions
@@ -104,130 +299,12 @@ function getPicker(): HTMLElement {
         overflowX: "hidden",
     });
     
-    // Custom scrollbar for dark mode and magical animations
+    // Initialize theme-aware styles
     const style = document.createElement('style');
-    style.textContent = `
-        /* Onyx Clean Light Theme - Content Script */
-        :root {
-            --onyx-brand-primary: #e85a4f;    /* Coral/Salmon */
-            --onyx-brand-secondary: #495057;  /* Dark Gray */
-            --onyx-bg-primary: #ffffff;       /* Pure White */
-            --onyx-bg-secondary: #f8f9fa;     /* Very Light Gray */
-            --onyx-bg-tertiary: #e9ecef;      /* Light Gray */
-            --onyx-bg-hover: #dee2e6;         /* Hover state */
-            --onyx-border-primary: #dee2e6;   /* Light gray border */
-            --onyx-border-secondary: #e85a4f; /* Coral accent */
-            --onyx-text-primary: #212529;     /* Dark text */
-            --onyx-text-secondary: #6c757d;   /* Medium gray */
-            --onyx-text-muted: #adb5bd;       /* Light gray */
-            --onyx-scrollbar-thumb: #e85a4f;  /* Coral thumb */
-            --onyx-scrollbar-thumb-hover: #dc3545; /* Darker coral */
-        }
-        
-        #onyx-picker::-webkit-scrollbar {
-            width: 8px;
-        }
-        #onyx-picker::-webkit-scrollbar-track {
-            background: var(--onyx-bg-secondary);
-        }
-        #onyx-picker::-webkit-scrollbar-thumb {
-            background: var(--onyx-scrollbar-thumb);
-            border-radius: 4px;
-        }
-        #onyx-picker::-webkit-scrollbar-thumb:hover {
-            background: var(--onyx-scrollbar-thumb-hover);
-        }
-        
-        /* Border Trace Effect - Using coral colors for clean modern look */
-        @keyframes borderTrace {
-            0% {
-                box-shadow: inset 2px 0 0 #e85a4f, inset 0 0 0 transparent;
-            }
-            25% {
-                box-shadow: inset 2px 0 0 #e85a4f, inset 0 2px 0 #e85a4f;
-            }
-            50% {
-                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 #e85a4f, inset -2px 0 0 #e85a4f;
-            }
-            75% {
-                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 #e85a4f, inset -2px 0 0 #e85a4f;
-            }
-            100% {
-                box-shadow: inset 0 0 0 transparent;
-            }
-        }
-        
-        .onyx-border-trace-effect {
-            animation: borderTrace 400ms ease-in-out !important;
-        }
-        
-        
-        .onyx-ready-indicator {
-            position: relative;
-        }
-        
-        .onyx-ready-indicator::after {
-            content: "✨ Ready to inject";
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 11px;
-            color: var(--onyx-brand-primary);
-            opacity: 0.8;
-            animation: magicPulse 2s ease-in-out infinite;
-        }
-        
-        /* Magic Pulse Animation */
-        @keyframes magicPulse {
-            0%, 100% {
-                opacity: 0.8;
-                text-shadow: 0 0 3px var(--onyx-brand-primary);
-            }
-            50% {
-                opacity: 1;
-                text-shadow: 0 0 6px var(--onyx-brand-primary), 0 0 12px var(--onyx-brand-primary);
-            }
-        }
-        
-        /* Enhanced Exact Match Styling */
-        .onyx-exact-match {
-            background: rgba(232, 90, 79, 0.1) !important;
-            border-left: 3px solid var(--onyx-brand-primary) !important;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .onyx-exact-match::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(232, 90, 79, 0.2),
-                rgba(255, 255, 255, 0.3),
-                rgba(232, 90, 79, 0.2),
-                transparent
-            );
-            animation: magicSweep 3s ease-in-out infinite;
-        }
-        
-        @keyframes magicSweep {
-            0% {
-                left: -100%;
-            }
-            50% {
-                left: 100%;
-            }
-            100% {
-                left: 100%;
-            }
-        }
-    `;
+    style.id = 'onyx-theme-styles';
+    
+    // Get current theme and apply styles
+    initializeContentScriptTheme(style);
     document.head.appendChild(style);
     
     document.body.appendChild(picker);
@@ -427,7 +504,7 @@ function updatePicker(snippets: any[]) {
         // Fix: Add mousedown instead of click to handle selection before blur
         item.addEventListener('mousedown', (e) => {
             e.preventDefault(); // Prevent focus loss
-            insertSnippet(snippet);
+            insertSnippet(snippet, true);
         });
         
         picker.appendChild(item);
@@ -665,7 +742,7 @@ function handleSnippetModeKeyboard(e: KeyboardEvent) {
                 
                 const selectedSnippet = snippetModeState.filteredSnippets[snippetModeState.selectedIndex];
                 if (selectedSnippet) {
-                    insertSnippet(selectedSnippet);
+                    insertSnippet(selectedSnippet, true);
                 }
                 return false;
             }
@@ -678,7 +755,7 @@ function handleSnippetModeKeyboard(e: KeyboardEvent) {
                 
                 const selectedSnippet = snippetModeState.filteredSnippets[snippetModeState.selectedIndex];
                 if (selectedSnippet) {
-                    insertSnippet(selectedSnippet);
+                    insertSnippet(selectedSnippet, true);
                 }
             }
             break;
@@ -798,7 +875,7 @@ if (isClaudeAI) {
                 const selectedSnippet = snippetModeState.filteredSnippets[snippetModeState.selectedIndex];
                 if (selectedSnippet) {
                     console.log('🎯 Inserting snippet:', selectedSnippet.title);
-                    insertSnippet(selectedSnippet);
+                    insertSnippet(selectedSnippet, true);
                 }
             }
             return false;

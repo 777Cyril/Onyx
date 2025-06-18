@@ -1,49 +1,14 @@
 import { LitElement, html, css } from "lit";
 import { state } from "lit/decorators.js";
 import { getSnippets, addSnippet, updateSnippet, deleteSnippet, validateStorageSize, validateStorageUpdateSize } from "../storage";
+import { getCurrentTheme, toggleTheme, applyThemeVariables, onThemeChange } from "../utils/theme";
 
 
 class OnyxPopup extends LitElement {
   static styles = css`
-    /* Clean Light Theme - Modern Minimal with Coral Accents */
+    /* Dynamic Theme-Aware Styles */
     :host {
-      /* Brand Colors */
-      --brand-primary: #e85a4f;  /* Coral/Salmon */
-      --brand-secondary: #495057; /* Dark Gray */
-      
-      /* Background Colors */
-      --bg-primary: #ffffff;     /* Pure white - main background */
-      --bg-secondary: #f8f9fa;   /* Very light gray for cards/forms */
-      --bg-tertiary: #e9ecef;    /* Light gray for hover states */
-      --bg-hover: #dee2e6;       /* Slightly darker hover state */
-      
-      /* Border Colors */
-      --border-primary: #dee2e6;   /* Light gray border */
-      --border-secondary: #e85a4f; /* Coral accent border */
-      --border-hover: #dc3545;     /* Slightly darker coral hover */
-      
-      /* Text Colors */
-      --text-primary: #212529;     /* Dark text for main content */
-      --text-secondary: #6c757d;   /* Medium gray for secondary text */
-      --text-muted: #adb5bd;       /* Light gray for muted text */
-      
-      /* Scrollbar Colors */
-      --scrollbar-track: transparent;
-      --scrollbar-thumb: #e85a4f;   /* Coral thumb */
-      --scrollbar-thumb-hover: #dc3545; /* Darker coral hover */
-      
-      /* Success/Error Colors */
-      --success-bg: rgba(232, 90, 79, 0.1);   /* Light coral tint */
-      --success-border: rgba(232, 90, 79, 0.25);
-      --error-bg: #f8d7da;
-      --error-border: #dc3545;
-      --error-text: #721c24;
-      
-      /* Glass Effect Colors */
-      --glass-bg: rgba(255, 255, 255, 0.8);   /* Light white tint */
-      --glass-border: rgba(232, 90, 79, 0.2);
-      --glass-shimmer: rgba(232, 90, 79, 0.4); /* Coral shimmer */
-      
+      /* CSS variables will be set dynamically by theme system */
       display: block;
       background: var(--bg-primary);
       color: var(--text-primary);
@@ -53,6 +18,27 @@ class OnyxPopup extends LitElement {
       margin: 0;
       position: relative;
       overflow: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Global transitions for theme changes */
+    *, *::before, *::after {
+      transition: 
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+    }
+
+    /* Preserve interactive element transitions */
+    button, input, textarea, .action-btn, .theme-toggle {
+      transition: 
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease !important;
     }
 
     /* Custom scrollbar */
@@ -78,6 +64,18 @@ class OnyxPopup extends LitElement {
       position: sticky;
       top: 0;
       z-index: 10;
+      position: relative;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      flex: 1;
     }
 
     h1 {
@@ -95,6 +93,59 @@ class OnyxPopup extends LitElement {
       font-weight: 400;
     }
 
+    /* Apple-style Theme Toggle */
+    .theme-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 1rem;
+      flex-shrink: 0;
+    }
+
+    .theme-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .theme-toggle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      outline: none;
+      position: relative;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-toggle.light {
+      background: #6c757d; /* Neutral gray for light mode */
+      border: 1px solid #dee2e6;
+    }
+
+    .theme-toggle.dark {
+      background: #555555; /* Neutral darker gray for dark mode */
+      border: 1px solid #404040;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.15);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .theme-toggle:focus {
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
     /* Main content area */
     .content {
       padding: 1rem;
@@ -110,7 +161,7 @@ class OnyxPopup extends LitElement {
 
     .search-input {
       width: 100%;
-      background: var(--bg-secondary);
+      background: var(--bg-tertiary);  /* Very dark background to match form inputs */
       border: 1px solid var(--border-primary);
       color: var(--text-primary);
       padding: 0.5rem 0.75rem;
@@ -123,7 +174,7 @@ class OnyxPopup extends LitElement {
 
     .search-input:focus {
       border-color: var(--brand-primary);
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Keep dark background on focus */
       box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
     }
 
@@ -151,7 +202,7 @@ class OnyxPopup extends LitElement {
     input,
     textarea {
       width: 100%;
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Very dark background for inputs */
       border: 1px solid var(--border-primary);
       color: var(--text-primary);
       padding: 0.5rem 0.75rem;
@@ -168,7 +219,7 @@ class OnyxPopup extends LitElement {
     input:focus,
     textarea:focus {
       border-color: var(--brand-primary);
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Keep dark background on focus */
       box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
       color: var(--text-primary);
     }
@@ -515,10 +566,49 @@ class OnyxPopup extends LitElement {
   @state()
   private showSpaceWarning = false;
 
+  @state()
+  private currentTheme = 'light';
+
 
   async connectedCallback() {
     super.connectedCallback();
     await this.loadSnippets();
+    await this.initializeTheme();
+  }
+
+  async initializeTheme() {
+    try {
+      // Get current theme from storage
+      this.currentTheme = await getCurrentTheme();
+      
+      // Apply theme variables to the host element
+      applyThemeVariables(this, this.currentTheme);
+      
+      // Listen for theme changes from other parts of extension
+      onThemeChange((newTheme) => {
+        this.currentTheme = newTheme;
+        applyThemeVariables(this, newTheme);
+        this.requestUpdate();
+      });
+      
+      this.requestUpdate();
+    } catch (error) {
+      console.error('Error initializing theme:', error);
+      // Fallback to light theme
+      this.currentTheme = 'light';
+      applyThemeVariables(this, 'light');
+    }
+  }
+
+  async handleThemeToggle() {
+    try {
+      const newTheme = await toggleTheme();
+      this.currentTheme = newTheme;
+      applyThemeVariables(this, newTheme);
+      this.requestUpdate();
+    } catch (error) {
+      console.error('Error toggling theme:', error);
+    }
   }
 
   async loadSnippets() {
@@ -774,11 +864,24 @@ class OnyxPopup extends LitElement {
   render() {
     return html`
       <div class="header">
-        <h1>Onyx</h1>
-        <p class="tagline">
-          Minimal. Fast. Ready.
-          <span class="trigger-hint">Use <code>x/</code> to trigger</span>
-        </p>
+        <div class="header-content">
+          <div class="header-left">
+            <h1>Onyx</h1>
+            <p class="tagline">
+              Minimal. Fast. Ready.
+              <span class="trigger-hint">Use <code>x/</code> to trigger</span>
+            </p>
+          </div>
+          <div class="theme-container">
+            <div class="theme-label">THEME</div>
+            <button 
+              class="theme-toggle ${this.currentTheme}"
+              @click=${this.handleThemeToggle}
+              title="Switch to ${this.currentTheme === 'light' ? 'dark' : 'light'} mode"
+              aria-label="Theme toggle - currently ${this.currentTheme} mode"
+            ></button>
+          </div>
+        </div>
       </div>
       
       <div class="content">
