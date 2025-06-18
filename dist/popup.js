@@ -1,10 +1,23 @@
-var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configurable:!0,writable:!0,value:e}):c[n]=e;var a=(c,n,e)=>b(c,typeof n!="symbol"?n+"":n,e);import{i as f,a as y,g as h,v,u as x,b as w,c as S,d as k,x as p,r as d}from"./assets/storage-Do-FYhGn.js";var C=Object.defineProperty,l=(c,n,e,r)=>{for(var o=void 0,t=c.length-1,i;t>=0;t--)(i=c[t])&&(o=i(n,e,o)||o);return o&&C(n,e,o),o};class s extends f{constructor(){super(...arguments);a(this,"snippets",[]);a(this,"newTitle","");a(this,"newContent","");a(this,"editingId",null);a(this,"searchQuery","");a(this,"filteredSnippets",[]);a(this,"errorMessage","");a(this,"showSuccess",!1);a(this,"originalScrollPosition",0);a(this,"showSpaceWarning",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(r=>{const o=(r.title||"").toLowerCase().includes(e),t=(r.content||"").toLowerCase().includes(e);return o||t})}handleSearch(e){const r=e.target;this.searchQuery=r.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const r=e.target;this.newTitle=r.value,r.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var o,t;const e=(o=this.shadowRoot)==null?void 0:o.querySelector('form input[type="text"]'),r=(t=this.shadowRoot)==null?void 0:t.querySelector("form textarea");e&&(e.value="",e.blur()),r&&(r.value="",r.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var r;const e=(r=this.shadowRoot)==null?void 0:r.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var r;const e=(r=this.shadowRoot)==null?void 0:r.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const r=this.newTitle.trim(),o=this.newContent.trim();if(!(!r||!o)){if(this.clearMessages(),r.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const t={id:this.editingId,title:r,content:o,createdAt:Date.now()},i=await v(t);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${i.maxItems}).`);return}await x(t),this.snippets=await h()}else{const t={id:crypto.randomUUID(),title:r,content:o,createdAt:Date.now()},i=await w(t);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${i.maxItems}).`);return}await S(t),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(t){console.error("Error saving snippet:",t),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const r=this.snippets.find(t=>t.id===e);if(!(!r||!confirm(`Delete "${r.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(t){console.error("Error deleting snippet:",t)}}handleEditSnippet(e){var t;const r=this.snippets.find(i=>i.id===e);if(!r)return;const o=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");o&&(this.originalScrollPosition=o.scrollTop),this.newTitle=r.title,this.newContent=r.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
+var x=Object.defineProperty;var w=(o,r,e)=>r in o?x(o,r,{enumerable:!0,configurable:!0,writable:!0,value:e}):o[r]=e;var n=(o,r,e)=>w(o,typeof r!="symbol"?r+"":r,e);import{i as k,a as S,g as m,v as T,u as C,b as E,c as z,d as $,x as p,r as l}from"./assets/storage-Do-FYhGn.js";const h="onyx-theme",u={light:{id:"light",name:"light",displayName:"Light Mode",icon:"",cssVariables:{"--brand-primary":"#e85a4f","--brand-secondary":"#495057","--bg-primary":"#ffffff","--bg-secondary":"#f8f9fa","--bg-tertiary":"#e9ecef","--bg-hover":"#dee2e6","--border-primary":"#dee2e6","--border-secondary":"#e85a4f","--border-hover":"#dc3545","--text-primary":"#212529","--text-secondary":"#6c757d","--text-muted":"#adb5bd","--scrollbar-track":"transparent","--scrollbar-thumb":"#e85a4f","--scrollbar-thumb-hover":"#dc3545","--success-bg":"rgba(232, 90, 79, 0.1)","--success-border":"rgba(232, 90, 79, 0.25)","--error-bg":"#f8d7da","--error-border":"#dc3545","--error-text":"#721c24","--glass-bg":"rgba(255, 255, 255, 0.8)","--glass-border":"rgba(232, 90, 79, 0.2)","--glass-shimmer":"rgba(232, 90, 79, 0.4)"}},dark:{id:"dark",name:"dark",displayName:"Dark Mode",icon:"",cssVariables:{"--brand-primary":"#ff0000","--brand-secondary":"#000000","--bg-primary":"#1a1a1a","--bg-secondary":"#1a1a1a","--bg-tertiary":"#2a2a2a","--bg-hover":"#333333","--border-primary":"#404040","--border-secondary":"#ff0000","--border-hover":"#ff3333","--text-primary":"#d0d0d0","--text-secondary":"#b0b0b0","--text-muted":"#888888","--scrollbar-track":"#2a2a2a","--scrollbar-thumb":"#555555","--scrollbar-thumb-hover":"#666666","--success-bg":"rgba(255, 0, 0, 0.1)","--success-border":"rgba(255, 0, 0, 0.25)","--error-bg":"#2d1b1b","--error-border":"#ff0000","--error-text":"#ffcccc","--glass-bg":"rgba(42, 42, 42, 0.8)","--glass-border":"rgba(255, 0, 0, 0.2)","--glass-shimmer":"rgba(255, 0, 0, 0.4)"}}},f="light";async function v(){try{return(await chrome.storage.sync.get(h))[h]||f}catch(o){return console.error("Error getting current theme:",o),f}}async function M(o){try{if(!u[o])throw new Error(`Theme "${o}" not found`);await chrome.storage.sync.set({[h]:o})}catch(r){throw console.error("Error setting theme:",r),r}}function P(o){const r=u[o];return r?r.cssVariables:(console.warn(`Theme "${o}" not found, falling back to default`),u[f].cssVariables)}async function U(){const r=await v()==="light"?"dark":"light";return await M(r),r}function g(o,r){const e=P(r);for(const[t,s]of Object.entries(e))o.style.setProperty(t,s)}function q(o){chrome.storage.onChanged.addListener((r,e)=>{if(e==="sync"&&r[h]){const t=r[h].newValue;t&&o(t)}})}var I=Object.defineProperty,d=(o,r,e,t)=>{for(var s=void 0,a=o.length-1,i;a>=0;a--)(i=o[a])&&(s=i(r,e,s)||s);return s&&I(r,e,s),s};class c extends k{constructor(){super(...arguments);n(this,"snippets",[]);n(this,"newTitle","");n(this,"newContent","");n(this,"editingId",null);n(this,"searchQuery","");n(this,"filteredSnippets",[]);n(this,"errorMessage","");n(this,"showSuccess",!1);n(this,"originalScrollPosition",0);n(this,"showSpaceWarning",!1);n(this,"currentTheme","light")}async connectedCallback(){super.connectedCallback(),await this.loadSnippets(),await this.initializeTheme()}async initializeTheme(){try{this.currentTheme=await v(),g(this,this.currentTheme),q(e=>{this.currentTheme=e,g(this,e),this.requestUpdate()}),this.requestUpdate()}catch(e){console.error("Error initializing theme:",e),this.currentTheme="light",g(this,"light")}}async handleThemeToggle(){try{const e=await U();this.currentTheme=e,g(this,e),this.requestUpdate()}catch(e){console.error("Error toggling theme:",e)}}async loadSnippets(){try{this.snippets=await m(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const s=(t.title||"").toLowerCase().includes(e),a=(t.content||"").toLowerCase().includes(e);return s||a})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const t=e.target;this.newTitle=t.value,t.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var s,a;const e=(s=this.shadowRoot)==null?void 0:s.querySelector('form input[type="text"]'),t=(a=this.shadowRoot)==null?void 0:a.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),s=this.newContent.trim();if(!(!t||!s)){if(this.clearMessages(),t.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const a={id:this.editingId,title:t,content:s,createdAt:Date.now()},i=await T(a);if(!i.isValid){if(i.projectedSize>i.maxSize){const b=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${b} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${i.maxItems}).`);return}await C(a),this.snippets=await m()}else{const a={id:crypto.randomUUID(),title:t,content:s,createdAt:Date.now()},i=await E(a);if(!i.isValid){if(i.projectedSize>i.maxSize){const b=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${b} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${i.maxItems}).`);return}await z(a),this.snippets=await m()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(a){console.error("Error saving snippet:",a),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(a=>a.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await $(e),this.snippets=await m(),this.filterSnippets(),this.requestUpdate()}catch(a){console.error("Error deleting snippet:",a)}}handleEditSnippet(e){var a;const t=this.snippets.find(i=>i.id===e);if(!t)return;const s=(a=this.shadowRoot)==null?void 0:a.querySelector(".content");s&&(this.originalScrollPosition=s.scrollTop),this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
       <div class="header">
-        <h1>Onyx</h1>
-        <p class="tagline">
-          Minimal. Fast. Ready.
-          <span class="trigger-hint">Use <code>x/</code> to trigger</span>
-        </p>
+        <div class="header-content">
+          <div class="header-left">
+            <h1>Onyx</h1>
+            <p class="tagline">
+              Minimal. Fast. Ready.
+              <span class="trigger-hint">Use <code>x/</code> to trigger</span>
+            </p>
+          </div>
+          <div class="theme-container">
+            <div class="theme-label">THEME</div>
+            <button 
+              class="theme-toggle ${this.currentTheme}"
+              @click=${this.handleThemeToggle}
+              title="Switch to ${this.currentTheme==="light"?"dark":"light"} mode"
+              aria-label="Theme toggle - currently ${this.currentTheme} mode"
+            ></button>
+          </div>
+        </div>
       </div>
       
       <div class="content">
@@ -121,46 +134,10 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
           `}
         </div>
       </div>
-    `}}a(s,"styles",y`
-    /* Clean Light Theme - Modern Minimal with Coral Accents */
+    `}}n(c,"styles",S`
+    /* Dynamic Theme-Aware Styles */
     :host {
-      /* Brand Colors */
-      --brand-primary: #e85a4f;  /* Coral/Salmon */
-      --brand-secondary: #495057; /* Dark Gray */
-      
-      /* Background Colors */
-      --bg-primary: #ffffff;     /* Pure white - main background */
-      --bg-secondary: #f8f9fa;   /* Very light gray for cards/forms */
-      --bg-tertiary: #e9ecef;    /* Light gray for hover states */
-      --bg-hover: #dee2e6;       /* Slightly darker hover state */
-      
-      /* Border Colors */
-      --border-primary: #dee2e6;   /* Light gray border */
-      --border-secondary: #e85a4f; /* Coral accent border */
-      --border-hover: #dc3545;     /* Slightly darker coral hover */
-      
-      /* Text Colors */
-      --text-primary: #212529;     /* Dark text for main content */
-      --text-secondary: #6c757d;   /* Medium gray for secondary text */
-      --text-muted: #adb5bd;       /* Light gray for muted text */
-      
-      /* Scrollbar Colors */
-      --scrollbar-track: transparent;
-      --scrollbar-thumb: #e85a4f;   /* Coral thumb */
-      --scrollbar-thumb-hover: #dc3545; /* Darker coral hover */
-      
-      /* Success/Error Colors */
-      --success-bg: rgba(232, 90, 79, 0.1);   /* Light coral tint */
-      --success-border: rgba(232, 90, 79, 0.25);
-      --error-bg: #f8d7da;
-      --error-border: #dc3545;
-      --error-text: #721c24;
-      
-      /* Glass Effect Colors */
-      --glass-bg: rgba(255, 255, 255, 0.8);   /* Light white tint */
-      --glass-border: rgba(232, 90, 79, 0.2);
-      --glass-shimmer: rgba(232, 90, 79, 0.4); /* Coral shimmer */
-      
+      /* CSS variables will be set dynamically by theme system */
       display: block;
       background: var(--bg-primary);
       color: var(--text-primary);
@@ -170,6 +147,27 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
       margin: 0;
       position: relative;
       overflow: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Global transitions for theme changes */
+    *, *::before, *::after {
+      transition: 
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+    }
+
+    /* Preserve interactive element transitions */
+    button, input, textarea, .action-btn, .theme-toggle {
+      transition: 
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease !important;
     }
 
     /* Custom scrollbar */
@@ -195,6 +193,18 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
       position: sticky;
       top: 0;
       z-index: 10;
+      position: relative;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      flex: 1;
     }
 
     h1 {
@@ -212,6 +222,59 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
       font-weight: 400;
     }
 
+    /* Apple-style Theme Toggle */
+    .theme-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 1rem;
+      flex-shrink: 0;
+    }
+
+    .theme-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .theme-toggle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      outline: none;
+      position: relative;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-toggle.light {
+      background: #6c757d; /* Neutral gray for light mode */
+      border: 1px solid #dee2e6;
+    }
+
+    .theme-toggle.dark {
+      background: #555555; /* Neutral darker gray for dark mode */
+      border: 1px solid #404040;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.15);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .theme-toggle:focus {
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
     /* Main content area */
     .content {
       padding: 1rem;
@@ -227,7 +290,7 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
 
     .search-input {
       width: 100%;
-      background: var(--bg-secondary);
+      background: var(--bg-tertiary);  /* Very dark background to match form inputs */
       border: 1px solid var(--border-primary);
       color: var(--text-primary);
       padding: 0.5rem 0.75rem;
@@ -240,7 +303,7 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
 
     .search-input:focus {
       border-color: var(--brand-primary);
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Keep dark background on focus */
       box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
     }
 
@@ -268,7 +331,7 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
     input,
     textarea {
       width: 100%;
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Very dark background for inputs */
       border: 1px solid var(--border-primary);
       color: var(--text-primary);
       padding: 0.5rem 0.75rem;
@@ -285,7 +348,7 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
     input:focus,
     textarea:focus {
       border-color: var(--brand-primary);
-      background: var(--bg-primary);
+      background: var(--bg-tertiary);  /* Keep dark background on focus */
       box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
       color: var(--text-primary);
     }
@@ -600,4 +663,4 @@ var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configura
     }
 
 
-  `);l([d()],s.prototype,"snippets");l([d()],s.prototype,"newTitle");l([d()],s.prototype,"newContent");l([d()],s.prototype,"editingId");l([d()],s.prototype,"searchQuery");l([d()],s.prototype,"filteredSnippets");l([d()],s.prototype,"errorMessage");l([d()],s.prototype,"showSuccess");l([d()],s.prototype,"originalScrollPosition");l([d()],s.prototype,"showSpaceWarning");customElements.define("onyx-popup",s);const g=document.getElementById("app");g&&g.appendChild(document.createElement("onyx-popup"));
+  `);d([l()],c.prototype,"snippets");d([l()],c.prototype,"newTitle");d([l()],c.prototype,"newContent");d([l()],c.prototype,"editingId");d([l()],c.prototype,"searchQuery");d([l()],c.prototype,"filteredSnippets");d([l()],c.prototype,"errorMessage");d([l()],c.prototype,"showSuccess");d([l()],c.prototype,"originalScrollPosition");d([l()],c.prototype,"showSpaceWarning");d([l()],c.prototype,"currentTheme");customElements.define("onyx-popup",c);const y=document.getElementById("app");y&&y.appendChild(document.createElement("onyx-popup"));
