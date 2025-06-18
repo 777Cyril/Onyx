@@ -5,44 +5,44 @@ import { getSnippets, addSnippet, updateSnippet, deleteSnippet, validateStorageS
 
 class OnyxPopup extends LitElement {
   static styles = css`
-    /* Coolors.co Palette - Green/Lavender/Gunmetal Theme */
+    /* Clean Light Theme - Modern Minimal with Coral Accents */
     :host {
       /* Brand Colors */
-      --brand-primary: #5A7D7C;  /* Hooker's green */
-      --brand-secondary: #232C33; /* Gunmetal */
+      --brand-primary: #e85a4f;  /* Coral/Salmon */
+      --brand-secondary: #495057; /* Dark Gray */
       
       /* Background Colors */
-      --bg-primary: #232C33;     /* Gunmetal - main background */
-      --bg-secondary: #2a3439;   /* Slightly lighter gunmetal */
-      --bg-tertiary: #313b41;    /* Even lighter for hover states */
-      --bg-hover: #3a464d;       /* Hover state */
+      --bg-primary: #ffffff;     /* Pure white - main background */
+      --bg-secondary: #f8f9fa;   /* Very light gray for cards/forms */
+      --bg-tertiary: #e9ecef;    /* Light gray for hover states */
+      --bg-hover: #dee2e6;       /* Slightly darker hover state */
       
       /* Border Colors */
-      --border-primary: #4a5a61;   /* Muted border */
-      --border-secondary: #5A7D7C; /* Green accent border */
-      --border-hover: #6a8d8c;     /* Lighter green hover */
+      --border-primary: #dee2e6;   /* Light gray border */
+      --border-secondary: #e85a4f; /* Coral accent border */
+      --border-hover: #dc3545;     /* Slightly darker coral hover */
       
       /* Text Colors */
-      --text-primary: #DADFF7;     /* Lavender for main text */
-      --text-secondary: #B5B2C2;   /* French gray for secondary text */
-      --text-muted: #8a9299;       /* Muted text */
+      --text-primary: #212529;     /* Dark text for main content */
+      --text-secondary: #6c757d;   /* Medium gray for secondary text */
+      --text-muted: #adb5bd;       /* Light gray for muted text */
       
       /* Scrollbar Colors */
       --scrollbar-track: transparent;
-      --scrollbar-thumb: #5A7D7C;   /* Green thumb */
-      --scrollbar-thumb-hover: #6a8d8c; /* Lighter green hover */
+      --scrollbar-thumb: #e85a4f;   /* Coral thumb */
+      --scrollbar-thumb-hover: #dc3545; /* Darker coral hover */
       
       /* Success/Error Colors */
-      --success-bg: rgba(90, 125, 124, 0.15);  /* Green tint */
-      --success-border: rgba(90, 125, 124, 0.3);
-      --error-bg: #3d2a2a;
-      --error-border: #d87171;
-      --error-text: #f5a5a5;
+      --success-bg: rgba(232, 90, 79, 0.1);   /* Light coral tint */
+      --success-border: rgba(232, 90, 79, 0.25);
+      --error-bg: #f8d7da;
+      --error-border: #dc3545;
+      --error-text: #721c24;
       
       /* Glass Effect Colors */
-      --glass-bg: rgba(218, 223, 247, 0.05);   /* Lavender tint */
-      --glass-border: rgba(218, 223, 247, 0.15);
-      --glass-shimmer: rgba(218, 223, 247, 0.3);
+      --glass-bg: rgba(255, 255, 255, 0.8);   /* Light white tint */
+      --glass-border: rgba(232, 90, 79, 0.2);
+      --glass-shimmer: rgba(232, 90, 79, 0.4); /* Coral shimmer */
       
       display: block;
       background: var(--bg-primary);
@@ -122,8 +122,9 @@ class OnyxPopup extends LitElement {
     }
 
     .search-input:focus {
-      border-color: var(--brand-secondary);
-      background: #222;
+      border-color: var(--brand-primary);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
     }
 
     .search-input::placeholder {
@@ -166,8 +167,10 @@ class OnyxPopup extends LitElement {
 
     input:focus,
     textarea:focus {
-      border-color: var(--brand-secondary);
-      background: #222;
+      border-color: var(--brand-primary);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
+      color: var(--text-primary);
     }
 
     input::placeholder,
@@ -385,7 +388,7 @@ class OnyxPopup extends LitElement {
       font-size: 0.75rem;
       padding: 0.5rem 0.75rem;
       backdrop-filter: blur(8px);
-      animation: slideInSuccess 0.3s ease-out;
+      animation: slideInSuccess 0.3s ease-out, successGlow 2s ease-in-out;
       position: relative;
       overflow: hidden;
     }
@@ -397,8 +400,25 @@ class OnyxPopup extends LitElement {
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--glass-shimmer), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--brand-primary),
+        var(--glass-shimmer),
+        var(--brand-primary),
+        transparent
+      );
       animation: shimmer 1.5s ease-in-out;
+    }
+    
+    @keyframes successGlow {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(232, 90, 79, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(232, 90, 79, 0.5), 
+                    0 0 25px rgba(232, 90, 79, 0.2);
+      }
     }
 
     @keyframes slideInSuccess {

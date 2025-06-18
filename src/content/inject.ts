@@ -107,21 +107,21 @@ function getPicker(): HTMLElement {
     // Custom scrollbar for dark mode and magical animations
     const style = document.createElement('style');
     style.textContent = `
-        /* Onyx Coolors.co Palette - Content Script */
+        /* Onyx Clean Light Theme - Content Script */
         :root {
-            --onyx-brand-primary: #5A7D7C;    /* Hooker's green */
-            --onyx-brand-secondary: #232C33;  /* Gunmetal */
-            --onyx-bg-primary: #232C33;       /* Gunmetal */
-            --onyx-bg-secondary: #2a3439;     /* Lighter gunmetal */
-            --onyx-bg-tertiary: #313b41;      /* Even lighter */
-            --onyx-bg-hover: #3a464d;         /* Hover state */
-            --onyx-border-primary: #4a5a61;   /* Muted border */
-            --onyx-border-secondary: #5A7D7C; /* Green accent */
-            --onyx-text-primary: #DADFF7;     /* Lavender */
-            --onyx-text-secondary: #B5B2C2;   /* French gray */
-            --onyx-text-muted: #8a9299;       /* Muted */
-            --onyx-scrollbar-thumb: #5A7D7C;  /* Green thumb */
-            --onyx-scrollbar-thumb-hover: #6a8d8c; /* Lighter green */
+            --onyx-brand-primary: #e85a4f;    /* Coral/Salmon */
+            --onyx-brand-secondary: #495057;  /* Dark Gray */
+            --onyx-bg-primary: #ffffff;       /* Pure White */
+            --onyx-bg-secondary: #f8f9fa;     /* Very Light Gray */
+            --onyx-bg-tertiary: #e9ecef;      /* Light Gray */
+            --onyx-bg-hover: #dee2e6;         /* Hover state */
+            --onyx-border-primary: #dee2e6;   /* Light gray border */
+            --onyx-border-secondary: #e85a4f; /* Coral accent */
+            --onyx-text-primary: #212529;     /* Dark text */
+            --onyx-text-secondary: #6c757d;   /* Medium gray */
+            --onyx-text-muted: #adb5bd;       /* Light gray */
+            --onyx-scrollbar-thumb: #e85a4f;  /* Coral thumb */
+            --onyx-scrollbar-thumb-hover: #dc3545; /* Darker coral */
         }
         
         #onyx-picker::-webkit-scrollbar {
@@ -138,19 +138,19 @@ function getPicker(): HTMLElement {
             background: var(--onyx-scrollbar-thumb-hover);
         }
         
-        /* Border Trace Effect */
+        /* Border Trace Effect - Using coral colors for clean modern look */
         @keyframes borderTrace {
             0% {
-                box-shadow: inset 2px 0 0 var(--onyx-brand-primary), inset 0 0 0 transparent;
+                box-shadow: inset 2px 0 0 #e85a4f, inset 0 0 0 transparent;
             }
             25% {
-                box-shadow: inset 2px 0 0 var(--onyx-brand-primary), inset 0 2px 0 var(--onyx-brand-primary);
+                box-shadow: inset 2px 0 0 #e85a4f, inset 0 2px 0 #e85a4f;
             }
             50% {
-                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 var(--onyx-brand-primary), inset -2px 0 0 var(--onyx-brand-primary);
+                box-shadow: inset 0 0 0 transparent, inset 0 2px 0 #e85a4f, inset -2px 0 0 #e85a4f;
             }
             75% {
-                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 var(--onyx-brand-primary), inset -2px 0 0 var(--onyx-brand-primary);
+                box-shadow: inset 0 0 0 transparent, inset 0 -2px 0 #e85a4f, inset -2px 0 0 #e85a4f;
             }
             100% {
                 box-shadow: inset 0 0 0 transparent;
@@ -161,11 +161,6 @@ function getPicker(): HTMLElement {
             animation: borderTrace 400ms ease-in-out !important;
         }
         
-        
-        .onyx-exact-match {
-            background: rgba(90, 125, 124, 0.15) !important;
-            border-left: 3px solid var(--onyx-brand-primary) !important;
-        }
         
         .onyx-ready-indicator {
             position: relative;
@@ -180,6 +175,57 @@ function getPicker(): HTMLElement {
             font-size: 11px;
             color: var(--onyx-brand-primary);
             opacity: 0.8;
+            animation: magicPulse 2s ease-in-out infinite;
+        }
+        
+        /* Magic Pulse Animation */
+        @keyframes magicPulse {
+            0%, 100% {
+                opacity: 0.8;
+                text-shadow: 0 0 3px var(--onyx-brand-primary);
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 6px var(--onyx-brand-primary), 0 0 12px var(--onyx-brand-primary);
+            }
+        }
+        
+        /* Enhanced Exact Match Styling */
+        .onyx-exact-match {
+            background: rgba(232, 90, 79, 0.1) !important;
+            border-left: 3px solid var(--onyx-brand-primary) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .onyx-exact-match::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(232, 90, 79, 0.2),
+                rgba(255, 255, 255, 0.3),
+                rgba(232, 90, 79, 0.2),
+                transparent
+            );
+            animation: magicSweep 3s ease-in-out infinite;
+        }
+        
+        @keyframes magicSweep {
+            0% {
+                left: -100%;
+            }
+            50% {
+                left: 100%;
+            }
+            100% {
+                left: 100%;
+            }
         }
     `;
     document.head.appendChild(style);

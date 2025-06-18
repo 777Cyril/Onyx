@@ -1,4 +1,4 @@
-var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configurable:!0,writable:!0,value:e}):c[n]=e;var s=(c,n,e)=>b(c,typeof n!="symbol"?n+"":n,e);import{i as f,a as y,g as h,v,u as x,b as w,c as S,d as k,x as p,r as d}from"./assets/storage-Do-FYhGn.js";var C=Object.defineProperty,l=(c,n,e,t)=>{for(var o=void 0,r=c.length-1,i;r>=0;r--)(i=c[r])&&(o=i(n,e,o)||o);return o&&C(n,e,o),o};class a extends f{constructor(){super(...arguments);s(this,"snippets",[]);s(this,"newTitle","");s(this,"newContent","");s(this,"editingId",null);s(this,"searchQuery","");s(this,"filteredSnippets",[]);s(this,"errorMessage","");s(this,"showSuccess",!1);s(this,"originalScrollPosition",0);s(this,"showSpaceWarning",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(t=>{const o=(t.title||"").toLowerCase().includes(e),r=(t.content||"").toLowerCase().includes(e);return o||r})}handleSearch(e){const t=e.target;this.searchQuery=t.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const t=e.target;this.newTitle=t.value,t.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var o,r;const e=(o=this.shadowRoot)==null?void 0:o.querySelector('form input[type="text"]'),t=(r=this.shadowRoot)==null?void 0:r.querySelector("form textarea");e&&(e.value="",e.blur()),t&&(t.value="",t.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var t;const e=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const t=this.newTitle.trim(),o=this.newContent.trim();if(!(!t||!o)){if(this.clearMessages(),t.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const r={id:this.editingId,title:t,content:o,createdAt:Date.now()},i=await v(r);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${i.maxItems}).`);return}await x(r),this.snippets=await h()}else{const r={id:crypto.randomUUID(),title:t,content:o,createdAt:Date.now()},i=await w(r);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${i.maxItems}).`);return}await S(r),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(r){console.error("Error saving snippet:",r),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const t=this.snippets.find(r=>r.id===e);if(!(!t||!confirm(`Delete "${t.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(r){console.error("Error deleting snippet:",r)}}handleEditSnippet(e){var r;const t=this.snippets.find(i=>i.id===e);if(!t)return;const o=(r=this.shadowRoot)==null?void 0:r.querySelector(".content");o&&(this.originalScrollPosition=o.scrollTop),this.newTitle=t.title,this.newContent=t.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
+var u=Object.defineProperty;var b=(c,n,e)=>n in c?u(c,n,{enumerable:!0,configurable:!0,writable:!0,value:e}):c[n]=e;var a=(c,n,e)=>b(c,typeof n!="symbol"?n+"":n,e);import{i as f,a as y,g as h,v,u as x,b as w,c as S,d as k,x as p,r as d}from"./assets/storage-Do-FYhGn.js";var C=Object.defineProperty,l=(c,n,e,r)=>{for(var o=void 0,t=c.length-1,i;t>=0;t--)(i=c[t])&&(o=i(n,e,o)||o);return o&&C(n,e,o),o};class s extends f{constructor(){super(...arguments);a(this,"snippets",[]);a(this,"newTitle","");a(this,"newContent","");a(this,"editingId",null);a(this,"searchQuery","");a(this,"filteredSnippets",[]);a(this,"errorMessage","");a(this,"showSuccess",!1);a(this,"originalScrollPosition",0);a(this,"showSpaceWarning",!1)}async connectedCallback(){super.connectedCallback(),await this.loadSnippets()}async loadSnippets(){try{this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(e){console.error("Error loading snippets:",e),this.snippets=[],this.filteredSnippets=[]}}filterSnippets(){if(!this.searchQuery.trim()){this.filteredSnippets=[...this.snippets];return}const e=this.searchQuery.toLowerCase();this.filteredSnippets=this.snippets.filter(r=>{const o=(r.title||"").toLowerCase().includes(e),t=(r.content||"").toLowerCase().includes(e);return o||t})}handleSearch(e){const r=e.target;this.searchQuery=r.value,this.filterSnippets(),this.requestUpdate()}handleTitleInput(e){const r=e.target;this.newTitle=r.value,r.value.includes(" ")?this.showSpaceWarning=!0:this.showSpaceWarning=!1,this.requestUpdate()}clearMessages(){this.errorMessage="",this.showSuccess=!1}showError(e){this.errorMessage=e,this.showSuccess=!1,setTimeout(()=>{this.errorMessage="",this.requestUpdate()},5e3)}showSuccessMessage(){this.showSuccess=!0,this.errorMessage="",setTimeout(()=>{this.showSuccess=!1,this.requestUpdate()},3e3)}clearForm(){this.newTitle="",this.newContent="",this.editingId=null,this.showSpaceWarning=!1,setTimeout(()=>{var o,t;const e=(o=this.shadowRoot)==null?void 0:o.querySelector('form input[type="text"]'),r=(t=this.shadowRoot)==null?void 0:t.querySelector("form textarea");e&&(e.value="",e.blur()),r&&(r.value="",r.blur())},0),this.requestUpdate()}scrollToForm(){setTimeout(()=>{var r;const e=(r=this.shadowRoot)==null?void 0:r.querySelector("form");e&&e.scrollIntoView({behavior:"smooth",block:"start"})},0)}scrollToOriginalPosition(){setTimeout(()=>{var r;const e=(r=this.shadowRoot)==null?void 0:r.querySelector(".content");e&&e.scrollTo({top:this.originalScrollPosition,behavior:"smooth"})},0)}async handleAddSnippet(e){e.preventDefault();const r=this.newTitle.trim(),o=this.newContent.trim();if(!(!r||!o)){if(this.clearMessages(),r.includes(" ")){this.showError('Prompt titles cannot contain spaces. Use underscores or hyphens instead (e.g., "task_management" or "task-management").');return}try{if(this.editingId){const t={id:this.editingId,title:r,content:o,createdAt:Date.now()},i=await v(t);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot update: would exceed maximum number of items (${i.maxItems}).`);return}await x(t),this.snippets=await h()}else{const t={id:crypto.randomUUID(),title:r,content:o,createdAt:Date.now()},i=await w(t);if(!i.isValid){if(i.projectedSize>i.maxSize){const m=i.projectedSize-i.maxSize;this.showError(`Prompt too large! Exceeds individual item limit by ${m} bytes. Try shortening the content.`)}else this.showError(`Cannot add prompt: would exceed maximum number of items (${i.maxItems}).`);return}await S(t),this.snippets=await h()}this.clearForm(),this.filterSnippets(),this.showSuccessMessage(),this.requestUpdate(),setTimeout(()=>{this.scrollToOriginalPosition()},150)}catch(t){console.error("Error saving snippet:",t),this.showError("Failed to save prompt. Please try again.")}}}async handleDeleteSnippet(e){const r=this.snippets.find(t=>t.id===e);if(!(!r||!confirm(`Delete "${r.title}"?`)))try{await k(e),this.snippets=await h(),this.filterSnippets(),this.requestUpdate()}catch(t){console.error("Error deleting snippet:",t)}}handleEditSnippet(e){var t;const r=this.snippets.find(i=>i.id===e);if(!r)return;const o=(t=this.shadowRoot)==null?void 0:t.querySelector(".content");o&&(this.originalScrollPosition=o.scrollTop),this.newTitle=r.title,this.newContent=r.content,this.editingId=e,this.requestUpdate(),this.scrollToForm()}handleCancelEdit(){this.clearForm(),setTimeout(()=>{this.scrollToOriginalPosition()},100)}render(){return p`
       <div class="header">
         <h1>Onyx</h1>
         <p class="tagline">
@@ -121,45 +121,45 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
           `}
         </div>
       </div>
-    `}}s(a,"styles",y`
-    /* Coolors.co Palette - Green/Lavender/Gunmetal Theme */
+    `}}a(s,"styles",y`
+    /* Clean Light Theme - Modern Minimal with Coral Accents */
     :host {
       /* Brand Colors */
-      --brand-primary: #5A7D7C;  /* Hooker's green */
-      --brand-secondary: #232C33; /* Gunmetal */
+      --brand-primary: #e85a4f;  /* Coral/Salmon */
+      --brand-secondary: #495057; /* Dark Gray */
       
       /* Background Colors */
-      --bg-primary: #232C33;     /* Gunmetal - main background */
-      --bg-secondary: #2a3439;   /* Slightly lighter gunmetal */
-      --bg-tertiary: #313b41;    /* Even lighter for hover states */
-      --bg-hover: #3a464d;       /* Hover state */
+      --bg-primary: #ffffff;     /* Pure white - main background */
+      --bg-secondary: #f8f9fa;   /* Very light gray for cards/forms */
+      --bg-tertiary: #e9ecef;    /* Light gray for hover states */
+      --bg-hover: #dee2e6;       /* Slightly darker hover state */
       
       /* Border Colors */
-      --border-primary: #4a5a61;   /* Muted border */
-      --border-secondary: #5A7D7C; /* Green accent border */
-      --border-hover: #6a8d8c;     /* Lighter green hover */
+      --border-primary: #dee2e6;   /* Light gray border */
+      --border-secondary: #e85a4f; /* Coral accent border */
+      --border-hover: #dc3545;     /* Slightly darker coral hover */
       
       /* Text Colors */
-      --text-primary: #DADFF7;     /* Lavender for main text */
-      --text-secondary: #B5B2C2;   /* French gray for secondary text */
-      --text-muted: #8a9299;       /* Muted text */
+      --text-primary: #212529;     /* Dark text for main content */
+      --text-secondary: #6c757d;   /* Medium gray for secondary text */
+      --text-muted: #adb5bd;       /* Light gray for muted text */
       
       /* Scrollbar Colors */
       --scrollbar-track: transparent;
-      --scrollbar-thumb: #5A7D7C;   /* Green thumb */
-      --scrollbar-thumb-hover: #6a8d8c; /* Lighter green hover */
+      --scrollbar-thumb: #e85a4f;   /* Coral thumb */
+      --scrollbar-thumb-hover: #dc3545; /* Darker coral hover */
       
       /* Success/Error Colors */
-      --success-bg: rgba(90, 125, 124, 0.15);  /* Green tint */
-      --success-border: rgba(90, 125, 124, 0.3);
-      --error-bg: #3d2a2a;
-      --error-border: #d87171;
-      --error-text: #f5a5a5;
+      --success-bg: rgba(232, 90, 79, 0.1);   /* Light coral tint */
+      --success-border: rgba(232, 90, 79, 0.25);
+      --error-bg: #f8d7da;
+      --error-border: #dc3545;
+      --error-text: #721c24;
       
       /* Glass Effect Colors */
-      --glass-bg: rgba(218, 223, 247, 0.05);   /* Lavender tint */
-      --glass-border: rgba(218, 223, 247, 0.15);
-      --glass-shimmer: rgba(218, 223, 247, 0.3);
+      --glass-bg: rgba(255, 255, 255, 0.8);   /* Light white tint */
+      --glass-border: rgba(232, 90, 79, 0.2);
+      --glass-shimmer: rgba(232, 90, 79, 0.4); /* Coral shimmer */
       
       display: block;
       background: var(--bg-primary);
@@ -239,8 +239,9 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
     }
 
     .search-input:focus {
-      border-color: var(--brand-secondary);
-      background: #222;
+      border-color: var(--brand-primary);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
     }
 
     .search-input::placeholder {
@@ -283,8 +284,10 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
 
     input:focus,
     textarea:focus {
-      border-color: var(--brand-secondary);
-      background: #222;
+      border-color: var(--brand-primary);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px rgba(232, 90, 79, 0.1);
+      color: var(--text-primary);
     }
 
     input::placeholder,
@@ -502,7 +505,7 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
       font-size: 0.75rem;
       padding: 0.5rem 0.75rem;
       backdrop-filter: blur(8px);
-      animation: slideInSuccess 0.3s ease-out;
+      animation: slideInSuccess 0.3s ease-out, successGlow 2s ease-in-out;
       position: relative;
       overflow: hidden;
     }
@@ -514,8 +517,25 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--glass-shimmer), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--brand-primary),
+        var(--glass-shimmer),
+        var(--brand-primary),
+        transparent
+      );
       animation: shimmer 1.5s ease-in-out;
+    }
+    
+    @keyframes successGlow {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(232, 90, 79, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(232, 90, 79, 0.5), 
+                    0 0 25px rgba(232, 90, 79, 0.2);
+      }
     }
 
     @keyframes slideInSuccess {
@@ -580,4 +600,4 @@ var g=Object.defineProperty;var b=(c,n,e)=>n in c?g(c,n,{enumerable:!0,configura
     }
 
 
-  `);l([d()],a.prototype,"snippets");l([d()],a.prototype,"newTitle");l([d()],a.prototype,"newContent");l([d()],a.prototype,"editingId");l([d()],a.prototype,"searchQuery");l([d()],a.prototype,"filteredSnippets");l([d()],a.prototype,"errorMessage");l([d()],a.prototype,"showSuccess");l([d()],a.prototype,"originalScrollPosition");l([d()],a.prototype,"showSpaceWarning");customElements.define("onyx-popup",a);const u=document.getElementById("app");u&&u.appendChild(document.createElement("onyx-popup"));
+  `);l([d()],s.prototype,"snippets");l([d()],s.prototype,"newTitle");l([d()],s.prototype,"newContent");l([d()],s.prototype,"editingId");l([d()],s.prototype,"searchQuery");l([d()],s.prototype,"filteredSnippets");l([d()],s.prototype,"errorMessage");l([d()],s.prototype,"showSuccess");l([d()],s.prototype,"originalScrollPosition");l([d()],s.prototype,"showSpaceWarning");customElements.define("onyx-popup",s);const g=document.getElementById("app");g&&g.appendChild(document.createElement("onyx-popup"));
